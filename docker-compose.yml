@@ -1,0 +1,84 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: paul
+      MYSQL_PASSWORD: paulp
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # Puerto AMQP (conexión de RabbitMQ)
+      - "15672:15672" # Puerto de gestión de RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: paul
+      RABBITMQ_DEFAULT_PASS: paul
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  orquestador:
+    build:
+      context: ./orquestador
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./orquestador/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./orquestador:/app # Mapea la carpeta de imágenes para persistencia
+    command: ["npm", "run", "dev"]
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./bot:/app # Mapea la carpeta de imágenes para persistencia
+    command: ["npm", "start"]
+  responder:
+    build:
+      context: ./responder
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      PORT: 3000
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./responder:/app # Mapea la carpeta de imágenes para persistencia
+    command: ["npm", "start"]
+volumes:
+  mysql_data:
