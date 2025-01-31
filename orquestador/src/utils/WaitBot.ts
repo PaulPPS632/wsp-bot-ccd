@@ -1,4 +1,4 @@
-const waitForBot = async (port, retries = 10, delay = 8000) => {
+export const waitForBot = async (port:number, retries:number = 10, delay:number = 8000) => {
     for (let i = 0; i < retries; i++) {
         await new Promise((resolve) => setTimeout(resolve, delay));
       try {
@@ -15,5 +15,3 @@ const waitForBot = async (port, retries = 10, delay = 8000) => {
     }
     throw new Error(`El bot en el puerto ${port} no está disponible después de ${retries} intentos.`);
   };
-
-  module.exports = waitForBot;

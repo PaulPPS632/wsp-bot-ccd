@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js"
+    "lint": "ts-standard",
+    "start": "node build/index.js",
+    "tsc": "npx tsc --init",
+    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -12,14 +16,23 @@
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
-    "bull": "^4.16.5",
     "cors": "^2.8.5",
     "dockerode": "^4.0.4",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mysql2": "^3.12.0",
-    "sequelize": "^6.37.5"
+    "sequelize": "^6.37.5",
+    "sequelize-typescript": "^2.1.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@types/amqplib": "^0.10.6",
+    "@types/cors": "^2.8.17",
+    "@types/dockerode": "^3.3.34",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.12.0",
+    "@types/validator": "^13.12.2",
+    "nodemon": "^3.1.9",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
   }
 }
