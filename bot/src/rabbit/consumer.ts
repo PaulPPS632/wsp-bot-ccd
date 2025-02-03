@@ -1,7 +1,9 @@
 import { utils } from "@builderbot/bot"
 import { connectRabbitMQ } from "./rabbitmqConfig"
+import { BaileysProvider } from "@builderbot/provider-baileys";
+import { join } from "path";
 
-export const startRabbitConsumer = async (adapterProvider) => {
+export const startRabbitConsumer = async (adapterProvider: BaileysProvider) => {
     try {
       const { channel } = await connectRabbitMQ();
       
@@ -10,7 +12,7 @@ export const startRabbitConsumer = async (adapterProvider) => {
   
         try {
           const content = msg.content.toString();
-          const { number, delai, mensaje } = JSON.parse(content);
+          const { number, delai, flow } = JSON.parse(content);
           console.log(`Esperando ${delai}ms para enviar mensaje a: ${number}`);
           await utils.delay(delai);
   
@@ -21,22 +23,29 @@ export const startRabbitConsumer = async (adapterProvider) => {
           if (onWhats[0]?.exists) {
             try {
               console.log(`Enviando mensaje a:`, number);
-              /*
+              if(flow.id == 1){
+                await adapterProvider.sendMedia(number+ "@s.whatsapp.net",join(process.cwd(), 'assets', 'flyer_promo_verano.png'),'')
+              }else{
+                await adapterProvider.sendMedia(number+ "@s.whatsapp.net",join(process.cwd(), 'assets', 'arma_tu_pack.png'),'')
+              }
+              
+             //const ruta ="https://resizing.flixster.com/niYOMxJrorsKHOTGcD-PzbhHo5Y=/fit-in/705x460/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p16473346_b_h8_ad.jpg"
+             
+              for(const mensaje of flow.mensajes){
                 await adapterProvider.sendMessage(
-                  number,
-                  [
-                    "🌞 Hola somos CCD. Este verano queremos que aproveches nuestra *PROMOCIÓN en CURSOS y DIPLOMAS de Ingeniería y Minería*.",
-                    "💻 Clases en vivo por Zoom, con docentes expertos y certificado incluido. ¡Desde *S/299*!",
-                    "✅ ¡Responde con el número de tu opción y te atenderemos de inmediato!",
-                    "🚨 Selecciona una opción:",
-                    "👉 1 Conocer más detalles.",
-                    "👉 2 Hablar con un asesor.",
-                    "👉 3 No continuar por ahora.",
-                  ].join("\n"),
+                  number, mensaje.content.body,
                   {}
-                );*/
+                );
+              }
               await adapterProvider.sendMessage(
-                number, mensaje.content.body,
+                number,
+                [
+                  "✅ ¡Responde con el número de tu opción y te atenderemos de inmediato!",
+                  "🚨 Selecciona una opción:",
+                  "👉 1 Conocer más detalles.",
+                  "👉 2 Hablar con un asesor.",
+                  "👉 3 No continuar por ahora.",
+                ].join("\n"),
                 {}
               );
               channel.ack(msg);

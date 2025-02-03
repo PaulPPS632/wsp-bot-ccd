@@ -1,31 +1,36 @@
-import { AllowNull, Column, DataType, Model, Table } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { Flows } from "./Flows";
 
 @Table({
     tableName: "leads"
 })
 export class Leads extends Model{
 
-    @AllowNull(false)
+    @AllowNull(true)
     @Column(DataType.STRING)
     name!: string;
 
     @AllowNull(false)
     @Column(DataType.STRING)
-    phone!: string;
+    number!: string;
 
+    @BelongsTo(() => Flows)
+    flow!: Flows;
+
+    @ForeignKey(() => Flows)
     @AllowNull(true)
-    @Column(DataType.STRING)
-    flow!: string;
+    @Column(DataType.INTEGER)
+    flowId!: number
 
     @AllowNull(true)
     @Column(DataType.STRING)
     curso!: string;
 
-    @AllowNull(false)
+    @AllowNull(true)
     @Column(DataType.STRING)
     respuesta!: string;
 
-    @AllowNull(true)
+    @AllowNull(false)
     @Column(DataType.BOOLEAN)
     status!: boolean;
 }

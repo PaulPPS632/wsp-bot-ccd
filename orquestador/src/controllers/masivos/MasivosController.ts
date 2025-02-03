@@ -1,4 +1,5 @@
-import { Bases } from "../../models/Bases";
+
+import { Leads } from "../../models/Leads";
 import RabbitMQService from "../../services/RabbitMQService";
 
 class MasivosController {
@@ -6,7 +7,7 @@ class MasivosController {
     const { masivos } = req.body;
     try {
       // Obtener bots y bases desde la base de datos
-      const bases = await Bases.findAll({
+      const bases = await Leads.findAll({
         where: {
           status: false,
         },
@@ -32,17 +33,23 @@ class MasivosController {
         const queue = "bases";
         const cantdelay =(Math.floor(Math.random() * (masivos.delaymax - masivos.delaymin + 1)) + masivos.delaymin) * 1000;
 
-        let randomIndex = Math.floor(Math.random() * masivos.mensajes.length);
-        let mensajeAleatorio = masivos.mensajes[randomIndex];
+        let randomIndex = Math.floor(Math.random() * masivos.flows.length);
+        let flowAleatorio = masivos.flows[randomIndex];
 
-        const message = { number: number, delai: cantdelay, mensaje: mensajeAleatorio };
+        const message = { number: number, delai: cantdelay, flow: flowAleatorio };
         
         // Enviar mensaje a la cola "bases"
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
+        await Leads.update({
+          flowId:flowAleatorio.id,
+          status: true
+        },{where:{
+          number: number
+        }})
       }
       // Actualizar el estado de todas las bases a 'true'
       if (numbers.length > 0) {
-        await Bases.update({ status: true }, { where: { number: numbers } });
+        await Leads.update({ status: true }, { where: { number: numbers } });
       }
       res
         .status(200)
@@ -56,7 +63,7 @@ class MasivosController {
   };
   FailMessage = async (req: any, res: any) => {
     const { number } = req.body;
-    await Bases.update(
+    await Leads.update(
       {
         status: false,
       },

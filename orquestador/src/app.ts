@@ -4,6 +4,7 @@ import BotRouter from "./routes/Bot.routes";
 import MasivosRouter from "./routes/Masivos.routes";
 import MensajesRouter from "./routes/Mensajes.routes";
 import LeadsRouter from "./routes/Leads.routes";
+import FlowsRouter from "./routes/Flows.routes";
 class App {
     private server: Application;
     constructor() {
@@ -25,6 +26,7 @@ class App {
       this.server.use("/api/masivos", MasivosRouter);
       this.server.use("/api/mensajes", MensajesRouter);
       this.server.use("/api/leads", LeadsRouter);
+      this.server.use("/api/flows", FlowsRouter);
     }
     public getServer(): Application {
       return this.server;

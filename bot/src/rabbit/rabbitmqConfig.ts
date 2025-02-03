@@ -2,7 +2,7 @@ import amqp from "amqplib";
 
 const rabbitSettings = {
   protocol: "amqp",
-  hostname: "localhost",
+  hostname: "rabbitmq",
   port: 5672,
   username: "paul",
   password: "paul",
