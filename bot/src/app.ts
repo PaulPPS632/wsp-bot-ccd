@@ -5,13 +5,12 @@ import {
   addKeyword,
   EVENTS,
 } from "@builderbot/bot";
-import { MemoryDB as Database } from "@builderbot/bot";
+import { MysqlAdapter as Database } from "@builderbot/database-mysql";
 import { BaileysProvider as Provider } from "@builderbot/provider-baileys";
 import { startRabbitConsumer } from "./rabbit/consumer";
 
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
-
 const interesado = addKeyword([EVENTS.ACTION, "1", "2", "si"])
   .addAnswer(
     "📝☎Listo estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 822 842 (WhatsApp verificado) 👩🏻‍💻.",
@@ -72,7 +71,17 @@ const main = async () => {
     usePairingCode: true,
     phoneNumber,
   });
-  const adapterDB = new Database();
+  const config = {
+    host: process.env.DB_HOST ?? '',
+    user: process.env.DB_USER ?? '',
+    database: process.env.DB_NAME ?? '',
+    password: process.env.DB_PASSWORD ?? '',
+    port: parseInt(process.env.DB_PORT, 10) ?? 3000
+  }
+  console.log(config)
+  const adapterDB = new Database(config);
+
+
   const { handleCtx, httpServer } = await createBot({
     flow: adapterFlow,
     provider: adapterProvider,

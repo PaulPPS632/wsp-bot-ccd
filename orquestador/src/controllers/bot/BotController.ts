@@ -1,3 +1,4 @@
+import DatabaseManager from "../../config/DatabaseManager";
 import { Bot } from "../../models/Bot";
 import DockerService from "../../services/DockerService";
 import { waitForBot } from "../../utils/WaitBot";
@@ -12,13 +13,24 @@ class BotController {
       const cantBots = await Bot.count();
       const port = 3000 + cantBots;
 
+      const db_name = `bot_db_${phone}`;
+
+      await DatabaseManager.createDatabase(db_name);
+
       const docker = DockerService.getInstance().getDocker();
 
       // Crear y correr un contenedor
       const container = await docker.createContainer({
         Image: imagebot, // Imagen del bot
         name: `bot-${imagebot}-${phone}`, // Nombre único del contenedor
-        Env: [`PORT=${port}`, `PHONE=51${phone}`],
+        Env: [
+          `PHONE=51${phone}`,
+          `DB_HOST=mysql-bots`,
+          `DB_USER=root`,
+          `DB_NAME=${db_name}`, // Nueva DB específica del bot
+          `DB_PASSWORD=botsito`,
+          `DB_PORT=3306`
+          ],
         ExposedPorts: {
           "3000/tcp": {}, // Puerto expuesto dentro del contenedor
         },
@@ -44,6 +56,7 @@ class BotController {
         pairingCode: botData.pairingCode,
         phone,
         tipo: imagebot,
+        db_name
       });
 
       res.status(201).json({

@@ -24,4 +24,8 @@ export class Bot extends Model{
     @AllowNull(false)
     @Column(DataType.STRING)
     tipo!: string;
+
+    @AllowNull(false)
+    @Column(DataType.STRING)
+    db_name!:string;
 }
