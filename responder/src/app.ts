@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { createBot, createProvider, createFlow, addKeyword, utils, EVENTS } from '@builderbot/bot'
-import { MemoryDB as Database } from '@builderbot/bot'
+import { MysqlAdapter as Database } from "@builderbot/database-mysql";
 import { BaileysProvider as Provider } from '@builderbot/provider-baileys'
 import { consultayselectedCurso, selectedCurso } from './cursosSelected'
 
@@ -124,7 +124,15 @@ const main = async () => {
     const adapterFlow = createFlow([promoverano, armatupack, welcome, mensajefinal])
     
     const adapterProvider = createProvider(Provider, { usePairingCode: true, phoneNumber})
-    const adapterDB = new Database()
+    const config = {
+      host: process.env.DB_HOST ?? '',
+      user: process.env.DB_USER ?? '',
+      database: process.env.DB_NAME ?? '',
+      password: process.env.DB_PASSWORD ?? '',
+      port: parseInt(process.env.DB_PORT, 10) ?? 3000
+    }
+    console.log(config)
+    const adapterDB = new Database(config);
 
     const { handleCtx, httpServer } = await createBot({
         flow: adapterFlow,
