@@ -45,8 +45,15 @@ class BotController {
           },
           Binds: [
             // Montar un volumen para la base de datos
-            `D:/volumenesBot/${phone}:/app/bot_sessions`
-          ]
+            `/home/paul/Escritorio/VolumenesBot/${phone}:/app/bot_sessions`
+          ],
+          LogConfig:{
+            Type: "json-file",
+            Config:{
+              "max-size": "10m",
+              "max-file": "3"
+            }
+          }
         },
       });
 
