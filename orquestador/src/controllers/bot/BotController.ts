@@ -43,6 +43,10 @@ class BotController {
               },
             ],
           },
+          Binds: [
+            // Montar un volumen para la base de datos
+            `D:/volumenesBot/${phone}:/app/bot_sessions`
+          ]
         },
       });
 

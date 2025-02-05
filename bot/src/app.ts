@@ -8,6 +8,7 @@ import {
 import { MysqlAdapter as Database } from "@builderbot/database-mysql";
 import { BaileysProvider as Provider } from "@builderbot/provider-baileys";
 import { startRabbitConsumer } from "./rabbit/consumer";
+import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
@@ -120,6 +121,7 @@ const main = async () => {
     }
     console.log("Bot conectado a WhatsApp!");
     await startRabbitConsumer(adapterProvider);
+    LimpiezaSession();
   };
 
   
