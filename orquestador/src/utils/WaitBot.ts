@@ -4,8 +4,9 @@ export const waitForBot = async (port:number, retries:number = 10, delay:number 
       try {
         // Intentar conectarse al bot
         const response = await fetch(`http://localhost:${port}/v1/codigo`);
+        const respuesta = await response.json()
         if (response.ok) {
-          return await response.json(); // Si la respuesta es exitosa, retornamos el JSON
+          return respuesta; // Si la respuesta es exitosa, retornamos el JSON
         }
       } catch (error) {
         // Si falla, esperar antes del próximo intento
