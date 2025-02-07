@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const dockerode_1 = __importDefault(require("dockerode"));
+class DockerService {
+    constructor() {
+        //this.docker = new Docker({ socketPath: "//./pipe/docker_engine" });
+        this.docker = new dockerode_1.default({ socketPath: "/var/run/docker.sock" });
+    }
+    static getInstance() {
+        if (!DockerService.instance) {
+            DockerService.instance = new DockerService();
+        }
+        return DockerService.instance;
+    }
+    getDocker() {
+        return this.docker;
+    }
+}
+exports.default = DockerService;

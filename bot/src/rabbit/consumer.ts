@@ -3,7 +3,7 @@ import { connectRabbitMQ } from "./rabbitmqConfig"
 import { BaileysProvider } from "@builderbot/provider-baileys";
 import { join } from "path";
 
-export const startRabbitConsumer = async (adapterProvider: BaileysProvider) => {
+export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta_local_orquestador: string) => {
     try {
       const { channel } = await connectRabbitMQ();
       
@@ -51,7 +51,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider) => {
               channel.ack(msg);
             } catch (sendErr) {
               console.error("Error al enviar mensaje:", sendErr);
-              await fetch("http://host.docker.internal:8000/failmessage", {
+              await fetch(`http://${ruta_local_orquestador}:8000/failmessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ number }),

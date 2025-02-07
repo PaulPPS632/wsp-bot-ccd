@@ -1,7 +1,9 @@
+
 import DatabaseManager from "../../config/DatabaseManager";
 import { Bot } from "../../models/Bot";
 import DockerService from "../../services/DockerService";
 import { waitForBot } from "../../utils/WaitBot";
+import { getLastPort } from "../../utils/getLastPort";
 
 class BotController {
   createBot = async (req: any, res: any) => {
@@ -10,8 +12,7 @@ class BotController {
       if (!phone || isNaN(phone) || phone.length < 9) {
         return res.status(400).json({ error: "Número de teléfono inválido" });
       }
-      const cantBots = await Bot.count();
-      const port = 3000 + cantBots;
+      const port = await getLastPort();
 
       const db_name = `bot_db_${phone}`;
 
@@ -53,6 +54,10 @@ class BotController {
               "max-size": "10m",
               "max-file": "3"
             }
+          },
+          RestartPolicy: {
+            Name: "on-failure",
+            MaximumRetryCount: 5
           }
         },
       });
@@ -104,7 +109,7 @@ class BotController {
             continue;
           }
 
-          await container.start();
+          await container.restart();
         } catch (err) {
           console.error(
             `Error al inicializar el contenedor ${containerId} de numbero ${phone}:`,
@@ -290,6 +295,12 @@ class BotController {
       console.log(`Esperando a que el bot en el puerto ${port} esté listo...`);
     }
   };
+
+  getprueba = async (_req: any, res: any) => {
+    const port = await getLastPort();
+
+    return res.status(200).json({port})
+  }
 }
 
 export default BotController;

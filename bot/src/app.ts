@@ -12,7 +12,8 @@ import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
-const interesado = addKeyword([EVENTS.ACTION, "1", "2", "si"])
+const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';
+const interesado = addKeyword([EVENTS.ACTION, "1", "2"],{ sensitive: true })
   .addAnswer(
     "📝☎Listo estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 822 842 (WhatsApp verificado) 👩🏻‍💻.",
     { capture: false }
@@ -20,7 +21,8 @@ const interesado = addKeyword([EVENTS.ACTION, "1", "2", "si"])
   .addAction(async (ctx) => {
     const name = ctx.name;
     const phone = ctx.from;
-    await fetch(`http://host.docker.internal:8000/api/leads`, {
+    console.log(`haciendo fetch: http://${ruta_local_orquestador}:8000/api/leads`)
+    await fetch(`http://${ruta_local_orquestador}:8000/api/leads`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -31,7 +33,7 @@ const interesado = addKeyword([EVENTS.ACTION, "1", "2", "si"])
     });
     return;
   });
-const nointeresado = addKeyword([EVENTS.ACTION, "3", "no"]).addAnswer(
+const nointeresado = addKeyword([EVENTS.ACTION, "3"], {sensitive:true}).addAnswer(
   [
     "📝Muy bien estimado, si estuviera interesado no dude en escribirnos y con gusto lo atenderemos 🙋🏻‍♀",
     "📌Le adjunto el número 908822842",
@@ -120,7 +122,7 @@ const main = async () => {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
     console.log("Bot conectado a WhatsApp!");
-    await startRabbitConsumer(adapterProvider);
+    await startRabbitConsumer(adapterProvider, ruta_local_orquestador);
     LimpiezaSession();
   };
 

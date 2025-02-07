@@ -12,7 +12,8 @@ const phoneNumber = process.env.PHONE ?? "51948701436";
 const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
     [
       "📝Muy bien estimado, hemos registrado el curso que le interesa",
-      "📌en unos minutos un asesor se estara comunicando con usted",
+      "📌en unos minutos un *asesor* se estara comunicando con usted",
+      "📌si desea cambiar de curso solo ingrese nuevamente el numero de curso de su preferencia",
     ].join("\n"),
     { capture: false },async (ctx, {endFlow}) => {
         return endFlow("gracias por su comunicacion")
@@ -46,10 +47,11 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
       }else{
-        await flowDynamic(`Hubo un error al seleccionar`)
+        await flowDynamic(`Porfavor ingresa un numero de la lista de cursos`)
         return fallBack();
       }
     } else {
+      await flowDynamic("Estimado(a) porfavor ingrese el numero del curso que le interesa. Puede ver los cursos en el flyer")
       return fallBack();
     }
   },
@@ -74,7 +76,7 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
   ].join('\n'))
   .addAnswer([
     'Buen día estimado(a) ¿En qué curso estaría interesado(a) para brindarle mayor información?😊📚',
-    '👉 porfavor indique el numero del curso que le interesa'
+    '👉 porfavor indique el numero del curso que le interesa, en la imagen del flyer puede escoger'
   ].join("\n"), {capture: true},
   async (ctx, { fallBack, gotoFlow, flowDynamic }) => {
     const body = ctx.body.trim().toLocaleLowerCase();
@@ -85,11 +87,11 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
       }else{
-        await flowDynamic(`Hubo un error al seleccionar`)
+        await flowDynamic(`Hubo un error al seleccionar, porfavor intentelo nuevamente`)
         return fallBack();
       }
     } else {
-      await flowDynamic("Ingreso un valor no admitido")
+      await flowDynamic("Estimado(a) porfavor ingrese el numero del curso que le interesa. Puede ver los cursos en el flyer")
       return fallBack();
     }
   },
@@ -122,7 +124,6 @@ const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
       );
 const main = async () => {
     const adapterFlow = createFlow([promoverano, armatupack, welcome, mensajefinal])
-    
     const adapterProvider = createProvider(Provider, { usePairingCode: true, phoneNumber})
     const config = {
       host: process.env.DB_HOST ?? '',

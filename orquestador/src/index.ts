@@ -6,7 +6,7 @@ import RabbitMQService from "./services/RabbitMQService";
 
 async function main(): Promise<void> {
   try {
-    const PORT = process.env.PORT ?? 8000;
+    //const PORT = process.env.PORT ?? 8000;
     //sincronizacion de base de datos
 
     await database.sync();
@@ -14,8 +14,9 @@ async function main(): Promise<void> {
     //await RabbitMQService.
     const rabbitMQ = RabbitMQService.getInstance();
     await rabbitMQ.init();
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    app.listen(8000, '0.0.0.0', () => {
+      //console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Server is running on http://localhost:8000`);
     });
     /*
     process.on("SIGINT", async () => {

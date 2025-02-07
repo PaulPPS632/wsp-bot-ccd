@@ -1,5 +1,7 @@
+
+const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.17.0.1';
 const updateCursobyPhone = async (phone: string, curso: string): Promise<boolean> => {
-    const respuesta = await fetch(`http://host.docker.internal:8000/api/leads`, {
+    const respuesta = await fetch(`http://${ruta_local_orquestador}:8000/api/leads`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -20,7 +22,7 @@ export const selectedCurso = async (phone: string ,option: number, promocion: nu
     return {flag,curso};
 } 
 export const consultayselectedCurso = async (phone: string, option: number):Promise<{ flag: boolean, curso: string }> => {
-    const respuesta = await fetch(`http://host.docker.internal:8000/api/leads?number=${phone}`, {
+    const respuesta = await fetch(`http://${ruta_local_orquestador}:8000/api/leads?number=${phone}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
       });
