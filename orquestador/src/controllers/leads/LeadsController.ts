@@ -4,6 +4,7 @@ import { Flows } from "../../models/Flows";
 import { Leads } from "../../models/Leads";
 import XLSX from "xlsx";
 import { Op } from "sequelize";
+import { GoogleSheet } from "../../services/GoogleSheet";
 class LeadsController {
   RegisterLead = async (req: any, res: any) => {
     try {
@@ -80,8 +81,6 @@ class LeadsController {
   updatebynumber = async (req: any, res: any) => {
     try {
       const { phone, curso } = req.body;
-      console.log(phone);
-      console.log(curso);
       await Leads.update(
         {
           curso,
@@ -92,6 +91,8 @@ class LeadsController {
           },
         }
       );
+      const sheetInstance = await GoogleSheet.getInstance();
+      await sheetInstance.addRow(phone, curso);
       return res.status(201).json({ message: "actualizado correctamente" });
     } catch (error: any) {
       console.log(error.message);
