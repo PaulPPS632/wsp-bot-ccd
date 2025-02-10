@@ -5,8 +5,9 @@ class DockerService {
   private docker: Docker;
 
   private constructor() {
-    //this.docker = new Docker({ socketPath: "//./pipe/docker_engine" });
-    this.docker = new Docker({ socketPath: "/var/run/docker.sock" });
+    const socketPath = process.env.SOCKET_PATH_DOCKER ?? '/var/run/docker.sock' ;
+    this.docker = new Docker({ socketPath });
+    //this.docker = new Docker({ socketPath: "/var/run/docker.sock" });
   }
 
   static getInstance(): DockerService {

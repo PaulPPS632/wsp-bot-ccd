@@ -28,4 +28,8 @@ export class Bot extends Model{
     @AllowNull(false)
     @Column(DataType.STRING)
     db_name!:string;
+
+    @AllowNull(true)
+    @Column(DataType.BOOLEAN)
+    status!: boolean;
 }

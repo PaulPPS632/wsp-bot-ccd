@@ -65,6 +65,7 @@ class BotController {
       await container.start(); // Inicia el contenedor
 
       const botData = await waitForBot(port); //espera por la inicializacion del bot
+      console.log(botData);
       // Registrar el Bot
       const newBot = await Bot.create({
         containerId: container.id,
@@ -121,7 +122,13 @@ class BotController {
           });
         }
       }
-
+      await Bot.update({
+        status: true
+      },{
+        where: {
+          status: false
+        }
+      })
       res.status(200).json({
         message: "Procesamiento de bots completado",
         status: true,
@@ -161,6 +168,13 @@ class BotController {
           }
         })
       );
+      await Bot.update({
+        status: false
+      },{
+        where: {
+          status: true
+        }
+      })
       // Retornar los resultados de la operación
       res.status(200).json({
         message: "Operación completada. Resultado de detener los bots:",
@@ -195,7 +209,13 @@ class BotController {
 
       // Iniciar el contenedor
       await container.start();
-
+      await Bot.update({
+        status: true
+      },{
+        where:{
+          containerId
+        }
+      })
       res.status(200).json({
         message: "Bot iniciado correctamente.",
         containerId,
@@ -234,6 +254,15 @@ class BotController {
 
       // Detener el contenedor
       await container.stop();
+
+      await Bot.update({
+        status: false
+      },{
+        where:{
+          containerId
+        }
+      })
+
       res.status(200).json({
         message: "Bot detenido correctamente.",
         containerId,

@@ -109,8 +109,9 @@ const main = async () => {
     "/v1/codigo",
     handleCtx(async (bot, req, res) => {
       const pairingCode = bot.provider.vendor.authState.creds.pairingCode;
+      const status = bot.provider.vendor.authState.creds.registered;
       res.writeHead(200, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ pairingCode: pairingCode }));
+      return res.end(JSON.stringify({ pairingCode: pairingCode, status }));
     })
   );
   httpServer(+PORT);
