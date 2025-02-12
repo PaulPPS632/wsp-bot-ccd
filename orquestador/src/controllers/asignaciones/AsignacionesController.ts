@@ -1,3 +1,4 @@
+import { AsignacionCliente } from "../../models/AsignacionCliente";
 import { Asignaciones } from "../../models/Asignaciones";
 import { Clientes } from "../../models/Clientes";
 import RabbitMQService from "../../services/RabbitMQService";
@@ -5,7 +6,7 @@ import RabbitMQService from "../../services/RabbitMQService";
 export class AsignacionesController {
   sendAsignaciones = async (req: any, res: any) => {
     try {
-      const { numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
+      const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
 
       if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
       const numbers = numeros.map((numero: any) => ({ number: numero }));
@@ -18,21 +19,27 @@ export class AsignacionesController {
         where: { number: numeros },
       });
 
+      const newasignacion = await Asignaciones.create({
+        name,
+        amountsend: numbers.length,
+        botId: bot.id,
+        flowId: flow.id,
+      }) 
+      
       const asigbulk = numeros
         .map((numero: any) => {
           const cliente = clientes.find((c) => c.number === numero);
           return cliente
             ? {
+                asignacionId: newasignacion.id,
                 clienteId: cliente.id,
-                botId: bot.id,
-                flowId: flow.id,
                 status: "ENVIADO"
               }
             : null;
         })
         .filter((item: any) => item !== null);
 
-      await Asignaciones.bulkCreate(asigbulk);
+      await AsignacionCliente.bulkCreate(asigbulk);
 
       const rabbitMQ = await RabbitMQService.getInstance();
       const exchange = "asesores";
@@ -73,9 +80,9 @@ export class AsignacionesController {
         return res
           .status(404)
           .json({ message: "no se encontro el cliente de este numero" });
-      const ultimaAsignacion = await Asignaciones.findOne({
+      const ultimaAsignacion = await AsignacionCliente.findOne({
         where: { clienteId: cliente.id },
-        order: [["id", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
+        order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
       });
       if (!ultimaAsignacion) {
         return res

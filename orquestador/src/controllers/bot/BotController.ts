@@ -350,10 +350,14 @@ class BotController {
     try {
 
       const bot = await Bot.findOne({where:{id}});
+      
       if(!bot) return res.status(404).json({error: 'no se encuentra el bot'});
       const docker = DockerService.getInstance().getDocker();
       const container = docker.getContainer(bot.containerId);
       await container.stop();
+      await bot?.update({
+        status: false
+      })
       const exec = await container.exec({
         Cmd: ['rm', '-rf', '/app/bot_sessions/*'],  
         AttachStdout: true,

@@ -1,12 +1,17 @@
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Bot } from "./Bot";
 import { Flows } from "./Flows";
-import { Clientes } from "./Clientes";
-
 @Table({
     tableName: "asignaciones"
 })
 export class Asignaciones extends Model{
+    @AllowNull(false)
+    @Column(DataType.STRING)
+    name!: string;
+
+    @AllowNull(false)
+    @Column(DataType.INTEGER)
+    amountsend!: number;
 
     @BelongsTo(() => Bot)
     bot!: Bot;
@@ -24,20 +29,4 @@ export class Asignaciones extends Model{
     @Column(DataType.INTEGER)
     flowId!: number
 
-
-    @BelongsTo(() => Clientes)
-    cliente!: Clientes;
-
-    @ForeignKey(() => Clientes)
-    @AllowNull(true)
-    @Column(DataType.INTEGER)
-    clienteId!: number
-
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    status!: string;
-
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    observacionstatus!: string;
 }

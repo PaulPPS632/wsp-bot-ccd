@@ -1,3 +1,4 @@
+import { AsignacionCliente } from "./AsignacionCliente";
 import { Asignaciones } from "./Asignaciones";
 import { Bases } from "./Bases";
 import { Bot } from "./Bot";
@@ -13,6 +14,7 @@ export const models = [
     Bot,
     Clientes,
     Asignaciones,
+    AsignacionCliente,
     Bases,
     Mensajes,
     Flows,
