@@ -6,6 +6,7 @@ import MensajesRouter from "./routes/Mensajes.routes";
 import LeadsRouter from "./routes/Leads.routes";
 import FlowsRouter from "./routes/Flows.routes";
 import AsignacionesRouter from "./routes/Asignaciones.routes";
+import ReportsRouter from "./routes/Reports.routes";
 class App {
     private server: Application;
     constructor() {
@@ -29,6 +30,7 @@ class App {
       this.server.use("/api/leads", LeadsRouter);
       this.server.use("/api/flows", FlowsRouter);
       this.server.use("/api/asignaciones", AsignacionesRouter)
+      this.server.use("/api/reports", ReportsRouter);
     }
     public getServer(): Application {
       return this.server;

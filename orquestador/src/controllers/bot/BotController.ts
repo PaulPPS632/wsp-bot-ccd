@@ -47,7 +47,8 @@ class BotController {
           },
           Binds: [
             // Montar un volumen para la base de datos
-            `/home/paul/Escritorio/VolumenesBot/${phone}:/app/bot_sessions`
+            `/home/paul/Escritorio/VolumenesBot/${phone}/sessions:/app/bot_sessions`,
+            `/home/paul/Escritorio/VolumenesBot/${phone}/assets:/app/assets`,
           ],
           LogConfig:{
             Type: "json-file",
@@ -343,6 +344,38 @@ class BotController {
      } 
     })
     return res.status(200).json({bots: botsSearch});
+  }
+  deleteCache = async (req: any, res:any) => {
+    const { id } = req.params;
+    try {
+
+      const bot = await Bot.findOne({where:{id}});
+      if(!bot) return res.status(404).json({error: 'no se encuentra el bot'});
+      const docker = DockerService.getInstance().getDocker();
+      const container = docker.getContainer(bot.containerId);
+      await container.stop();
+      const exec = await container.exec({
+        Cmd: ['rm', '-rf', '/app/bot_sessions/*'],  
+        AttachStdout: true,
+        AttachStderr: true
+      });
+      const stream = await exec.start({});
+      stream.on('data', (data: Buffer) => {
+        console.log('stdout:', data.toString());
+      });
+
+      stream.on('end', () => {
+        console.log('Contenido de la carpeta /app/bot_sessions borrado.');
+
+        // Responder al cliente después de la ejecución exitosa
+        res.status(200).json({
+          message: "Contenido de la carpeta 'sessions' borrado y contenedor detenido con éxito.",
+        });
+      });
+    } catch (error) {
+      console.error('Error al eliminar la caché y detener el contenedor:', error);
+      res.status(500).json({ error: "Ocurrió un error al eliminar la caché o detener el contenedor." });
+    }
   }
 }
 
