@@ -30,48 +30,49 @@ export class WebSocketBots {
     const statuses: Array<{ containerId: string; phone: string; status: string; newPairingCode?: string }> = [];
   try {
     const bots = await Bot.findAll();
-
-    for (const bot of bots) {
-      try {
-        const response = await fetch(`http://localhost:${bot.port}/v1/codigo`);
-        const data = await response.json();
-        console.log("datos: ", {
-          pairingCode: data.pairingCode,
-          status: data.status
-        })
-        if (data.pairingCode !== bot.pairingCode || !data.status) {
-          statuses.push({
-            containerId: bot.containerId,
-            phone: bot.phone,
-            status: "desvinculado",
-            newPairingCode: data.pairingCode,
-          });
-          console.log(`Emitiendo mensaje de desvinculación para el bot ${bot.containerId}`);
-          await Bot.update(
-            { pairingCode: data.pairingCode },
-            { where: { id: bot.id } }
-          );
-        } else {
-          statuses.push({ containerId: bot.containerId,phone: bot.phone, status: "activo" });
-          await Bot.update(
-            { status: true },
-            { where: { id: bot.id } }
-          );
+    if(bots){
+      for (const bot of bots) {
+        try {
+          const response = await fetch(`http://localhost:${bot.port}/v1/codigo`);
+          const data = await response.json();
+          console.log("datos: ", {
+            pairingCode: data.pairingCode,
+            status: data.status
+          })
+          if (data.pairingCode !== bot.pairingCode || !data.status) {
+            statuses.push({
+              containerId: bot.containerId,
+              phone: bot.phone,
+              status: "desvinculado",
+              newPairingCode: data.pairingCode,
+            });
+            console.log(`Emitiendo mensaje de desvinculación para el bot ${bot.containerId}`);
+            await Bot.update(
+              { pairingCode: data.pairingCode },
+              { where: { id: bot.id } }
+            );
+          } else {
+            statuses.push({ containerId: bot.containerId,phone: bot.phone, status: "activo" });
+            await Bot.update(
+              { status: true },
+              { where: { id: bot.id } }
+            );
+          }
+        } catch (error) {
+          if(bot.status){
+            statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "inactivo" });
+            await Bot.update(
+              { status: false },
+              { where: { id: bot.id } }
+            );
+          }
+          
+          console.log(`El bot con containerId ${bot.containerId} en el puerto ${bot.port} está caído`);
         }
-      } catch (error) {
-        if(bot.status){
-          statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "inactivo" });
-          await Bot.update(
-            { status: false },
-            { where: { id: bot.id } }
-          );
-        }
-        
-        console.log(`El bot con containerId ${bot.containerId} en el puerto ${bot.port} está caído`);
-      }
-    } 
-    // Una vez evaluados todos los bots, se emite un único evento con el array de estados.
-    this.io.emit("bots-status", statuses);
+      } 
+      // Una vez evaluados todos los bots, se emite un único evento con el array de estados.
+      this.io.emit("bots-status", statuses);
+    }
   } catch (error) {
     console.error("Error al consultar el estado de los bots:", error);
   }

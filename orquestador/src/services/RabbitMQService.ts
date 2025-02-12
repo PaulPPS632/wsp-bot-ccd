@@ -104,3 +104,4 @@ class RabbitMQService {
 }
 
 export default RabbitMQService;
+     

@@ -281,7 +281,7 @@ class BotController {
   getBots = async (_req: any, res: any) => {
     try {
       const bots = await Bot.findAll();
-
+      if(!bots) return res.status(404).json({message:'no hay bots'});
       const docker = DockerService.getInstance().getDocker();
       const botsWithStatus = await Promise.all(
         bots.map(async (bot) => {
