@@ -12,6 +12,6 @@ BotRouter.post("/codigo", botController.getBotCodigo);
 BotRouter.post("/start", botController.startBotbyContainerID);
 BotRouter.post("/stop", botController.stopBotbyContainerID);
 BotRouter.get("/ultimo", botController.getprueba)
-
+BotRouter.post("/search", botController.search);
 
 export default BotRouter;

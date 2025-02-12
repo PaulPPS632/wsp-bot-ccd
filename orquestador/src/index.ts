@@ -18,8 +18,7 @@ async function main(): Promise<void> {
     new WebSocketBots(httpServer, 10000);
 
     //coneccion con rabbitmq
-    const rabbitMQ = RabbitMQService.getInstance();
-    await rabbitMQ.init();
+    await RabbitMQService.getInstance();
 
     //coneccion con googlesheet
     await GoogleSheet.getInstance(

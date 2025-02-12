@@ -19,9 +19,10 @@ class RabbitMQService {
 
   private constructor() {}
 
-  static getInstance(): RabbitMQService {
+  static async getInstance(): Promise<RabbitMQService> {
     if (!RabbitMQService.instance) {
       RabbitMQService.instance = new RabbitMQService();
+      await RabbitMQService.instance.init(); 
     }
     return RabbitMQService.instance;
   }
@@ -32,6 +33,9 @@ class RabbitMQService {
     try {
       this.connection = await amqp.connect(rabbitSettings);
       this.channel = await this.connection.createChannel();
+
+      const exchange = "asesores"; // Nombre del exchange
+      await this.channel.assertExchange(exchange, "direct", { durable: true });
 
       // Asegurarse de que las colas estén declaradas
       for (const queue of queues) {
@@ -67,7 +71,27 @@ class RabbitMQService {
       console.error(`❌ Error al enviar mensaje a la cola "${queue}":`, error);
     }
   }
+  async sendMessageToExchange(
+    exchange: string,
+    routingKey: string,
+    message: string
+  ): Promise<void> {
+    if (!this.channel) {
+      throw new Error("❌ El canal RabbitMQ no está disponible.");
+    }
 
+    try {
+      this.channel.publish(exchange, routingKey, Buffer.from(message));
+      console.log(
+        `📩 Mensaje enviado al exchange "${exchange}" con routing key "${routingKey}": ${message}`
+      );
+    } catch (error) {
+      console.error(
+        `❌ Error al enviar mensaje al exchange "${exchange}" con routing key "${routingKey}":`,
+        error
+      );
+    }
+  }
   async consumeMessages(queue: string, onMessage: (msg: string) => void): Promise<void> {
     if (!queues.includes(queue)) {
       throw new Error(`❌ La cola "${queue}" no está declarada.`);
