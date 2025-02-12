@@ -1,4 +1,5 @@
 
+import { Op } from "sequelize";
 import DatabaseManager from "../../config/DatabaseManager";
 import { Bot } from "../../models/Bot";
 import DockerService from "../../services/DockerService";
@@ -8,7 +9,7 @@ import { getLastPort } from "../../utils/getLastPort";
 class BotController {
   createBot = async (req: any, res: any) => {
     try {
-      const { phone, imagebot } = req.body;
+      const { phone, imagebot, namebot } = req.body;
       if (!phone || isNaN(phone) || phone.length < 9) {
         return res.status(400).json({ error: "Número de teléfono inválido" });
       }
@@ -69,6 +70,7 @@ class BotController {
       // Registrar el Bot
       const newBot = await Bot.create({
         containerId: container.id,
+        name: namebot.toLowerCase(),
         port,
         pairingCode: botData.pairingCode,
         phone,
@@ -329,6 +331,18 @@ class BotController {
     const port = await getLastPort();
 
     return res.status(200).json({port})
+  }
+
+  search = async (req: any, res: any) => {
+    const {search} = req.body;
+    const botsSearch = await Bot.findAll({
+     where:{
+      name: {
+        [Op.like]: `%${search.toLowerCase()}%`
+      }
+     } 
+    })
+    return res.status(200).json({bots: botsSearch});
   }
 }
 

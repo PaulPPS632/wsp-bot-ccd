@@ -5,6 +5,10 @@ import { AllowNull, Column, DataType, Model, Table } from "sequelize-typescript"
 })
 export class Bot extends Model{
 
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    name!: string;
+
     @AllowNull(false)
     @Column(DataType.STRING)
     containerId!: string;

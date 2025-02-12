@@ -3,59 +3,68 @@ import { Bot } from "../../models/Bot";
 import { Flows } from "../../models/Flows";
 import { Leads } from "../../models/Leads";
 import XLSX from "xlsx";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { GoogleSheet } from "../../services/GoogleSheet";
+import { MasivoLead } from "../../models/MasivoLead";
+import { Masivos } from "../../models/Masivos";
 class LeadsController {
   RegisterLead = async (req: any, res: any) => {
     try {
       const { name, phone, respuesta } = req.body;
-      if (respuesta == "interesado") {
-        const bot = await Bot.findAll({
-          where: {
-            tipo: "responder",
-          },
-          limit: 1,
-        });
-        if (bot) {
-          await Leads.update(
-            {
-              name,
-              number: phone,
-              respuesta,
-            },
-            {
-              where: {
-                number: phone,
-              },
-            }
-          );
-          const lead = await Leads.findOne({
-            where: { number: phone },
-          });
-
-          if (lead) {
-            const botResponse = await fetch(
-              `http://localhost:${bot[0].port}/v1/messages`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  number: phone,
-                  flow: lead.flowId ?? 0,
-                }),
-              }
-            );
-            if (!botResponse.ok) {
-              return res
-                .status(500)
-                .json({ error: "No se pudo enviar el mensaje al bot." });
-            }
+      const bot = await Bot.findAll({
+        where: {
+          tipo: "responder",
+        },
+        limit: 1,
+      });
+      const lead = await Leads.findOne({where:{number:phone}})
+      if (bot && lead) {
+        
+        lead.update(
+          {
+            name,
+            number: phone,
+            respuesta,
           }
-        } else {
-          console.warn(
-            "No se encontró un bot disponible del tipo 'responder'."
-          );
+        )
+        const masivolead = await MasivoLead.findOne({
+          where:{
+            leadId: lead.id
+          },
+          order: [["createdAt", "DESC"]]
+        })
+        if (masivolead) {
+          await masivolead.update({ status: respuesta,  });
+          if(respuesta == "interesado"){
+            await Masivos.update({
+              amountinteres : Sequelize.literal("amountinteres + 1"),//aumentar en 1 al valor actual
+            },{
+              where:{
+                id: masivolead.masivoId
+              }
+            })
+          }
         }
+        const botResponse = await fetch(
+          `http://localhost:${bot[0].port}/v1/messages`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              number: phone,
+              flow: lead.flowId ?? 0,
+            }),
+          }
+        );
+        if (!botResponse.ok) {
+          return res
+            .status(500)
+            .json({ error: "No se pudo enviar el mensaje al bot." });
+        }
+      } else {
+        console.warn(
+          "No se encontró un bot disponible del tipo 'responder'."
+        );
       }
 
       return res
@@ -79,6 +88,7 @@ class LeadsController {
     return res.status(200).json({ lead });
   };
   updatebynumber = async (req: any, res: any) => {
+    //punto final de mi proceso masivo
     try {
       const { phone, curso } = req.body;
       await Leads.update(
