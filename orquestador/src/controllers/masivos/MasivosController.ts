@@ -22,15 +22,6 @@ class MasivosController {
           .json({ error: "No se encontraron leads para enviar masivos" });
       }
 
-      /*
-      const numbers = bases.map((base) => base.number);
-      if (numbers.length === 0) {
-        return res
-          .status(404)
-          .json({ error: "No hay números disponibles para asignar" });
-      }
-      */
-
       // Enviar mensaje a la cola para cada número
       const rabbitMQ = await RabbitMQService.getInstance();
       

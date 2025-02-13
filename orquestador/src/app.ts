@@ -2,7 +2,6 @@ import express, { Application } from "express";
 import cors from "cors";
 import BotRouter from "./routes/Bot.routes";
 import MasivosRouter from "./routes/Masivos.routes";
-import MensajesRouter from "./routes/Mensajes.routes";
 import LeadsRouter from "./routes/Leads.routes";
 import FlowsRouter from "./routes/Flows.routes";
 import AsignacionesRouter from "./routes/Asignaciones.routes";
@@ -26,7 +25,6 @@ class App {
       //this.server.use("/api", UserRoutes);
       this.server.use("/api/bots", BotRouter);
       this.server.use("/api/masivos", MasivosRouter);
-      this.server.use("/api/mensajes", MensajesRouter);
       this.server.use("/api/leads", LeadsRouter);
       this.server.use("/api/flows", FlowsRouter);
       this.server.use("/api/asignaciones", AsignacionesRouter)

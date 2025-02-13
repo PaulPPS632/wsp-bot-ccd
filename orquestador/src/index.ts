@@ -15,7 +15,8 @@ async function main(): Promise<void> {
     const httpServer = createServer(app);
 
     //inizializacion del websocket
-    new WebSocketBots(httpServer, 10000);
+    const timeout = process.env.TIMEOUT_WEBSOCKET || 10000;
+    new WebSocketBots(httpServer, Number(timeout));
 
     //coneccion con rabbitmq
     await RabbitMQService.getInstance();

@@ -14,6 +14,10 @@ export class Leads extends Model{
     @Column(DataType.STRING)
     number!: string;
 
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    email!: string;
+    
     @BelongsTo(() => Flows)
     flow!: Flows;
 

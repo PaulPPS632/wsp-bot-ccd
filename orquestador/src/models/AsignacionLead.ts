@@ -1,11 +1,11 @@
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
-import { Clientes } from "./Clientes";
 import { Asignaciones } from "./Asignaciones";
+import { Leads } from "./Leads";
 
 @Table({
-    tableName:'asignacionescliente'
+    tableName:'asignacioneslead'
 })
-export class AsignacionCliente extends Model {
+export class AsignacionLead extends Model {
 
     @BelongsTo(() => Asignaciones)
     asignacion!: Asignaciones;
@@ -15,13 +15,14 @@ export class AsignacionCliente extends Model {
     @Column(DataType.INTEGER)
     asignacionId!: number
 
-    @BelongsTo(() => Clientes)
-    cliente!: Clientes;
 
-    @ForeignKey(() => Clientes)
+    @BelongsTo(() => Leads)
+    lead!: Leads;
+
+    @ForeignKey(() => Leads)
     @AllowNull(true)
     @Column(DataType.INTEGER)
-    clienteId!: number
+    leadId!: number
 
     @AllowNull(true)
     @Column(DataType.STRING)

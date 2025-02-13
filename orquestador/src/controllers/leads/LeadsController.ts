@@ -167,5 +167,15 @@ class LeadsController {
         });
     }
   };
+  cantRestanteParaMasivos = async (_req: any, res: any) => {
+    try {
+      const restante = await Leads.count({where:{status:false}});
+      console.log(restante)
+      return res.status(200).json({cant: restante});
+    } catch (error: any) {
+      console.log("error al obtener el restante", error);
+      return res.status(500).json({message:"error interno del servidor", error: error.menssage})
+    }
+  }
 }
 export default LeadsController;

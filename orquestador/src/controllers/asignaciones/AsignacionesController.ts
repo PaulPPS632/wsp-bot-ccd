@@ -1,6 +1,6 @@
-import { AsignacionCliente } from "../../models/AsignacionCliente";
+import { AsignacionLead } from "../../models/AsignacionLead";
 import { Asignaciones } from "../../models/Asignaciones";
-import { Clientes } from "../../models/Clientes";
+import { Leads } from "../../models/Leads";
 import RabbitMQService from "../../services/RabbitMQService";
 
 export class AsignacionesController {
@@ -11,11 +11,11 @@ export class AsignacionesController {
       if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
       const numbers = numeros.map((numero: any) => ({ number: numero }));
 
-      await Clientes.bulkCreate(numbers, {
+      await Leads.bulkCreate(numbers, {
         ignoreDuplicates: true,
       });
 
-      const clientes = await Clientes.findAll({
+      const clientes = await Leads.findAll({
         where: { number: numeros },
       });
 
@@ -39,7 +39,7 @@ export class AsignacionesController {
         })
         .filter((item: any) => item !== null);
 
-      await AsignacionCliente.bulkCreate(asigbulk);
+      await AsignacionLead.bulkCreate(asigbulk);
 
       const rabbitMQ = await RabbitMQService.getInstance();
       const exchange = "asesores";
@@ -71,17 +71,17 @@ export class AsignacionesController {
   FailMessage = async (req: any, res: any) => {
     try {
       const { number, error } = req.body;
-      const cliente = await Clientes.findOne({
+      const lead = await Leads.findOne({
         where: {
           number,
         },
       });
-      if (!cliente)
+      if (!lead)
         return res
           .status(404)
           .json({ message: "no se encontro el cliente de este numero" });
-      const ultimaAsignacion = await AsignacionCliente.findOne({
-        where: { clienteId: cliente.id },
+      const ultimaAsignacion = await AsignacionLead.findOne({
+        where: { leadId: lead.id },
         order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
       });
       if (!ultimaAsignacion) {
