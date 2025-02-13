@@ -57,6 +57,7 @@ class MasivosController {
         await MasivoLead.create({
           masivoId: nuevoMasivo.id,
           leadId: lead.id,
+          status: "ENVIADO"
         });
       }
 
@@ -76,18 +77,43 @@ class MasivosController {
     }
   };
   FailMessage = async (req: any, res: any) => {
-    const { number } = req.body;
-    await Leads.update(
-      {
-        status: false,
-      },
-      {
-        where: {
-          number: number,
-        },
-      }
-    );
-    return res.status(200).json();
+    try {
+          const { number, error } = req.body;
+          const lead = await Leads.findOne({
+            where: {
+              number,
+            },
+          });
+          if (!lead)
+            return res
+              .status(404)
+              .json({ message: "no se encontro el cliente de este numero" });
+          const ultimoMasivo = await MasivoLead.findOne({
+            where: { leadId: lead.id },
+            order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
+          });
+          if (!ultimoMasivo) {
+            return res
+              .status(404)
+              .json({
+                message: "No se encontró ningun masivo para este cliente",
+              });
+          }
+          await ultimoMasivo.update({
+            status: "error al enviar el mensaje",
+            observacionstatus: error,
+          });
+    
+          return res.status(200).json();
+        } catch (error: any) {
+          console.error("Error en FailMessage:", error.message);
+          return res
+            .status(500)
+            .json({
+              message: "Error al actualizar la asignación",
+              error: error.message,
+            });
+        }
   };
   
 }
