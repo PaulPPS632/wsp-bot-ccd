@@ -6,5 +6,5 @@ const ReportsRouter = Router();
 const reportsController = new ReportsController();
 ReportsRouter.get("/asignaciones", reportsController.ReporteAsignacion);
 ReportsRouter.get("/masivos", reportsController.ReporteMasivos);
-ReportsRouter.get("/leadsinteresados", reportsController.LeadsInteresados);
+ReportsRouter.get("/leadsinteresados/:id", reportsController.LeadsInteresados);
 export default ReportsRouter;

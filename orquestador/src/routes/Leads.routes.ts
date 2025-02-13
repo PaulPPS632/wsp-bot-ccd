@@ -9,5 +9,6 @@ LeadsRouter.post("", leadsController.RegisterLead);
 LeadsRouter.get("", leadsController.getbytNumber);
 LeadsRouter.put("", leadsController.updatebynumber);
 LeadsRouter.get("/excel", leadsController.downloadExcel);
+LeadsRouter.get("/leadsrestantes", leadsController.cantRestanteParaMasivos);
 
 export default LeadsRouter;

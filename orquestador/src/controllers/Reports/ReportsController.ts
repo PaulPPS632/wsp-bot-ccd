@@ -4,6 +4,7 @@ import { Flows } from "../../models/Flows";
 import { Leads } from "../../models/Leads";
 import { MasivoLead } from "../../models/MasivoLead";
 import { Masivos } from "../../models/Masivos"
+import { Bot } from "../../models/Bot";
 
 export class ReportsController {
 
@@ -29,12 +30,13 @@ export class ReportsController {
         }));
         return res.status(200).json({ masivos: formattedMasivos});
     }
-    LeadsInteresados= async (_req: any, res: any) => {
+    LeadsInteresados= async (req: any, res: any) => {
+        const { id } = req.params;
+        if(!id) return res.status(500).json({message: "se necesita un id para consultar"})
         const masivosLead = await MasivoLead.findAll({
             include:[
                 {
                     model: Masivos,
-                    
                 },
                 {
                     model: Leads,
@@ -46,9 +48,11 @@ export class ReportsController {
                 }
             ],
             where:{
-                status:{
-                    [Op.like]: { [Op.any]: ['interesado', 'interesado asesor'] } 
-                }
+                masivoId: id,
+                [Op.or]: [
+                    { status: { [Op.like]: 'interesado' } },
+                    { status: { [Op.like]: 'interesado asesor' } }
+                ]
             },
             limit:100
         });
@@ -64,8 +68,29 @@ export class ReportsController {
     }
     ReporteAsignacion = async(_req: any, res: any) => {
         const asignaciones = await Asignaciones.findAll({
+            include:[
+                {
+                    model: Bot,
+                    attributes:["name","phone"]
+                },{
+                    model: Flows,
+                    attributes: ["name"]
+                }
+            ],
             limit:20
         });
-        return res.status(200).json(asignaciones);
+
+        const format = asignaciones.map((asignacion) => ({
+            id: asignacion.id,
+            name: asignacion.name,
+            createdAt: asignacion.createdAt,
+            amountsend: asignacion.amountsend,
+            botname: asignacion.bot.name,
+            botphone: asignacion.bot.phone,
+            flowname: asignacion.flow.name,
+            
+        }))
+
+        return res.status(200).json({asignaciones: format});
     }
 }
