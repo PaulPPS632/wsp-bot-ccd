@@ -47,8 +47,8 @@ class BotController {
           },
           Binds: [
             // Montar un volumen para la base de datos
-            `/home/paul/Escritorio/VolumenesBot/${phone}/sessions:/app/bot_sessions`,
-            `/home/paul/Escritorio/VolumenesBot/${phone}/assets:/app/assets`,
+            `/home/paul/Escritorio/VolumenesBot/${phone}:/app/bot_sessions`,
+            //`/home/paul/Escritorio/VolumenesBot/${phone}/assets:/app/assets`,
           ],
           LogConfig:{
             Type: "json-file",
@@ -354,12 +354,9 @@ class BotController {
       if(!bot) return res.status(404).json({error: 'no se encuentra el bot'});
       const docker = DockerService.getInstance().getDocker();
       const container = docker.getContainer(bot.containerId);
-      await container.stop();
-      await bot?.update({
-        status: false
-      })
+      
       const exec = await container.exec({
-        Cmd: ['rm', '-rf', '/app/bot_sessions/*'],  
+        Cmd: ['sh', '-c', 'rm -rf /app/bot_sessions/* && echo "Deleted"'],
         AttachStdout: true,
         AttachStderr: true
       });
@@ -367,10 +364,15 @@ class BotController {
       stream.on('data', (data: Buffer) => {
         console.log('stdout:', data.toString());
       });
-
-      stream.on('end', () => {
+      stream.on('error', (err) => {
+        console.error('Error en la ejecución:', err);
+      });
+      stream.on('end', async () => {
         console.log('Contenido de la carpeta /app/bot_sessions borrado.');
-
+        await container.stop();
+        await bot?.update({
+          status: false
+        })
         // Responder al cliente después de la ejecución exitosa
         res.status(200).json({
           message: "Contenido de la carpeta 'sessions' borrado y contenedor detenido con éxito.",

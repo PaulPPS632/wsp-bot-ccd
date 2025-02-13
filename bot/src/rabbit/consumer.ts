@@ -49,12 +49,12 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
                 {}
               );
               channel.ack(msg);
-            } catch (sendErr) {
+            } catch (sendErr: any) {
               console.error("Error al enviar mensaje:", sendErr);
-              await fetch(`http://${ruta_local_orquestador}:8000/failmessage`, {
+              await fetch(`http://${ruta_local_orquestador}:8000/api/masivos/failmessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ number }),
+                body: JSON.stringify({ number, error: sendErr.message }),
               }).catch((error) => console.error("Error al actualizar estado:", error));
               channel.nack(msg, true, false);
             }

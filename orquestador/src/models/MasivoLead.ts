@@ -35,4 +35,7 @@ export class MasivoLead extends Model {
   @Column(DataType.STRING)
   status!: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  observacionstatus!: string;
 }
