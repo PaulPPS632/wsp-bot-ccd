@@ -57,6 +57,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
                       await adapterProvider.sendFile(number+ "@s.whatsapp.net", mensaje.content.body, mensaje.content.footer);
                       break;
                   }
+                  await utils.delay(300);
                 } catch (error: any) {
                   console.error(`❌ Error al enviar el mensaje de tipo '${mensaje.tipo}':`, error);
                 }
@@ -74,6 +75,11 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
             }
           } else {
             console.log("Número no está en WhatsApp:", number);
+            await fetch(`http://${ruta_local_orquestador}:8000/api/asignaciones/failmessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ number, error: 'Número no está en WhatsApp' }),
+            }).catch((error) => console.error("Error al actualizar estado:", error));
             channel.nack(msg, true, false);
           }
         } catch (error) {

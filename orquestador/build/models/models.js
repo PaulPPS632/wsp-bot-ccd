@@ -1,15 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.models = void 0;
-const Bases_1 = require("./Bases");
+const AsignacionLead_1 = require("./AsignacionLead");
+const Asignaciones_1 = require("./Asignaciones");
 const Bot_1 = require("./Bot");
 const Flows_1 = require("./Flows");
 const Leads_1 = require("./Leads");
-const Mensajes_1 = require("./Mensajes");
+const MasivoLead_1 = require("./MasivoLead");
+const Masivos_1 = require("./Masivos");
+const MasivosDlows_1 = require("./MasivosDlows");
 exports.models = [
     Bot_1.Bot,
-    Bases_1.Bases,
-    Mensajes_1.Mensajes,
+    Asignaciones_1.Asignaciones,
+    AsignacionLead_1.AsignacionLead,
     Flows_1.Flows,
     Leads_1.Leads,
+    Masivos_1.Masivos,
+    MasivosDlows_1.MasivosFlows,
+    MasivoLead_1.MasivoLead
 ];

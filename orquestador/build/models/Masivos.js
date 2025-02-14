@@ -9,53 +9,44 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bot = void 0;
+exports.Masivos = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
-let Bot = class Bot extends sequelize_typescript_1.Model {
+const Flows_1 = require("./Flows");
+const MasivosDlows_1 = require("./MasivosDlows");
+let Masivos = class Masivos extends sequelize_typescript_1.Model {
 };
-exports.Bot = Bot;
-__decorate([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Bot.prototype, "name", void 0);
+exports.Masivos = Masivos;
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(false),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
     __metadata("design:type", String)
-], Bot.prototype, "containerId", void 0);
+], Masivos.prototype, "name", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(false),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
     __metadata("design:type", Number)
-], Bot.prototype, "port", void 0);
+], Masivos.prototype, "amountsend", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Bot.prototype, "pairingCode", void 0);
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], Masivos.prototype, "delaymin", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Bot.prototype, "phone", void 0);
-__decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Bot.prototype, "tipo", void 0);
-__decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Bot.prototype, "db_name", void 0);
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], Masivos.prototype, "delaymax", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.BOOLEAN),
-    __metadata("design:type", Boolean)
-], Bot.prototype, "status", void 0);
-exports.Bot = Bot = __decorate([
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], Masivos.prototype, "amountinteres", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsToMany)(() => Flows_1.Flows, () => MasivosDlows_1.MasivosFlows),
+    __metadata("design:type", Array)
+], Masivos.prototype, "flows", void 0);
+exports.Masivos = Masivos = __decorate([
     (0, sequelize_typescript_1.Table)({
-        tableName: "bot"
+        tableName: "masivos",
     })
-], Bot);
+], Masivos);

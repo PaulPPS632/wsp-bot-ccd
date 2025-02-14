@@ -1,6 +1,8 @@
+
 import { Asignaciones } from "../models/Asignaciones";
 import { AsignacionLead } from "../models/AsignacionLead";
 import { Bot } from "../models/Bot";
+import { Flows } from "../models/Flows";
 import { Leads } from "../models/Leads";
 import RabbitMQService from "./RabbitMQService";
 
@@ -17,6 +19,9 @@ export const sendAsignacionProgramada = async (data: any) => {
                 include:[
                     {
                         model: Bot
+                    },
+                    {
+                        model: Flows
                     }
                 ]
             },
@@ -31,6 +36,7 @@ export const sendAsignacionProgramada = async (data: any) => {
     const promises = mensajes.map(async (mensaje) => {
         const routingKey = "51" + mensaje.asignacion.bot.phone;
         const message = { number: mensaje.lead.number, delay: mensaje.delay, flow: mensaje.asignacion.flow };
+        console.log(JSON.stringify(message));
         return rabbitMQ.sendMessageToExchange(exchange, routingKey, JSON.stringify(message));
       });
     

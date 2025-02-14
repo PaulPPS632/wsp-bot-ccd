@@ -36,7 +36,7 @@ export class AsignacionesController {
           return cliente
             ? {
                 asignacionId: newasignacion.id,
-                clienteId: cliente.id,
+                leadId: cliente.id,
                 status: "ENVIADO"
               }
             : null;
@@ -145,7 +145,7 @@ export class AsignacionesController {
           return cliente
             ? {
                 asignacionId: newasignacion.id,
-                clienteId: cliente.id,
+                leadId: cliente.id,
                 status: "PENDIENTE",
                 delay: cantdelay
               }
@@ -156,10 +156,11 @@ export class AsignacionesController {
       await AsignacionLead.bulkCreate(asigbulk);
 
       const taskQueueService = new TaskQueueService();
-      await taskQueueService.scheduleTask(programacion, newasignacion.id);
+      const idjob = await taskQueueService.scheduleTask(programacion, newasignacion.id);
+      
       return res
         .status(200)
-        .json({ message: `Asignacion programada`});
+        .json({ message: `Asignacion programada, jobId: ${idjob}`});
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
       return res

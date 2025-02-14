@@ -336,11 +336,13 @@ class BotController {
 
   search = async (req: any, res: any) => {
     const {search} = req.body;
+    const { imagebot } = req.query;
     const botsSearch = await Bot.findAll({
      where:{
       name: {
         [Op.like]: `%${search.toLowerCase()}%`
-      }
+      },
+      tipo: imagebot
      } 
     })
     return res.status(200).json({bots: botsSearch});

@@ -6,7 +6,7 @@ class FlowsController {
     try {
       const { flow } = req.body;
       await Flows.create({
-        name: flow.name.trim().replace(/ /g, "_"),
+        name: flow.name.trim(),
         mensajes: flow.mensajes,
       });
       return res.status(200).json({ message: "creado correctamente" });

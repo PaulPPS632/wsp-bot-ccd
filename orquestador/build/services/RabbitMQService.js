@@ -29,10 +29,13 @@ class RabbitMQService {
         this.channel = null;
     }
     static getInstance() {
-        if (!RabbitMQService.instance) {
-            RabbitMQService.instance = new RabbitMQService();
-        }
-        return RabbitMQService.instance;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!RabbitMQService.instance) {
+                RabbitMQService.instance = new RabbitMQService();
+                yield RabbitMQService.instance.init();
+            }
+            return RabbitMQService.instance;
+        });
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -41,6 +44,8 @@ class RabbitMQService {
             try {
                 this.connection = yield amqplib_1.default.connect(rabbitSettings);
                 this.channel = yield this.connection.createChannel();
+                const exchange = "asesores"; // Nombre del exchange
+                yield this.channel.assertExchange(exchange, "direct", { durable: true });
                 // Asegurarse de que las colas estén declaradas
                 for (const queue of queues) {
                     yield this.channel.assertQueue(queue);
@@ -73,6 +78,20 @@ class RabbitMQService {
             }
             catch (error) {
                 console.error(`❌ Error al enviar mensaje a la cola "${queue}":`, error);
+            }
+        });
+    }
+    sendMessageToExchange(exchange, routingKey, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.channel) {
+                throw new Error("❌ El canal RabbitMQ no está disponible.");
+            }
+            try {
+                this.channel.publish(exchange, routingKey, Buffer.from(message));
+                console.log(`📩 Mensaje enviado al exchange "${exchange}" con routing key "${routingKey}": ${message}`);
+            }
+            catch (error) {
+                console.error(`❌ Error al enviar mensaje al exchange "${exchange}" con routing key "${routingKey}":`, error);
             }
         });
     }

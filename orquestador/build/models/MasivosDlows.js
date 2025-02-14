@@ -9,29 +9,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Flows = void 0;
+exports.MasivosFlows = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const Masivos_1 = require("./Masivos");
-const MasivosDlows_1 = require("./MasivosDlows");
-let Flows = class Flows extends sequelize_typescript_1.Model {
+const Flows_1 = require("./Flows");
+let MasivosFlows = class MasivosFlows extends sequelize_typescript_1.Model {
 };
-exports.Flows = Flows;
+exports.MasivosFlows = MasivosFlows;
 __decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Flows.prototype, "name", void 0);
+    (0, sequelize_typescript_1.ForeignKey)(() => Masivos_1.Masivos),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], MasivosFlows.prototype, "masivoId", void 0);
 __decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.JSON),
-    __metadata("design:type", String)
-], Flows.prototype, "mensajes", void 0);
-__decorate([
-    (0, sequelize_typescript_1.BelongsToMany)(() => Masivos_1.Masivos, () => MasivosDlows_1.MasivosFlows),
-    __metadata("design:type", Array)
-], Flows.prototype, "masivos", void 0);
-exports.Flows = Flows = __decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => Flows_1.Flows),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], MasivosFlows.prototype, "flowId", void 0);
+exports.MasivosFlows = MasivosFlows = __decorate([
     (0, sequelize_typescript_1.Table)({
-        tableName: "flows"
+        tableName: "masivosflows",
     })
-], Flows);
+], MasivosFlows);

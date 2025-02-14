@@ -7,9 +7,10 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const Bot_routes_1 = __importDefault(require("./routes/Bot.routes"));
 const Masivos_routes_1 = __importDefault(require("./routes/Masivos.routes"));
-const Mensajes_routes_1 = __importDefault(require("./routes/Mensajes.routes"));
 const Leads_routes_1 = __importDefault(require("./routes/Leads.routes"));
 const Flows_routes_1 = __importDefault(require("./routes/Flows.routes"));
+const Asignaciones_routes_1 = __importDefault(require("./routes/Asignaciones.routes"));
+const Reports_routes_1 = __importDefault(require("./routes/Reports.routes"));
 class App {
     constructor() {
         this.server = (0, express_1.default)();
@@ -26,9 +27,10 @@ class App {
         //this.server.use("/api", UserRoutes);
         this.server.use("/api/bots", Bot_routes_1.default);
         this.server.use("/api/masivos", Masivos_routes_1.default);
-        this.server.use("/api/mensajes", Mensajes_routes_1.default);
         this.server.use("/api/leads", Leads_routes_1.default);
         this.server.use("/api/flows", Flows_routes_1.default);
+        this.server.use("/api/asignaciones", Asignaciones_routes_1.default);
+        this.server.use("/api/reports", Reports_routes_1.default);
     }
     getServer() {
         return this.server;

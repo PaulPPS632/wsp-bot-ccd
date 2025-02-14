@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const sequelize_1 = require("sequelize");
 const DatabaseManager_1 = __importDefault(require("../../config/DatabaseManager"));
 const Bot_1 = require("../../models/Bot");
 const DockerService_1 = __importDefault(require("../../services/DockerService"));
@@ -21,7 +22,7 @@ class BotController {
     constructor() {
         this.createBot = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { phone, imagebot } = req.body;
+                const { phone, imagebot, namebot } = req.body;
                 if (!phone || isNaN(phone) || phone.length < 9) {
                     return res.status(400).json({ error: "Número de teléfono inválido" });
                 }
@@ -55,7 +56,8 @@ class BotController {
                         },
                         Binds: [
                             // Montar un volumen para la base de datos
-                            `/home/paul/Escritorio/VolumenesBot/${phone}:/app/bot_sessions`
+                            `/home/paul/Escritorio/VolumenesBot/${phone}:/app/bot_sessions`,
+                            //`/home/paul/Escritorio/VolumenesBot/${phone}/assets:/app/assets`,
                         ],
                         LogConfig: {
                             Type: "json-file",
@@ -72,9 +74,11 @@ class BotController {
                 });
                 yield container.start(); // Inicia el contenedor
                 const botData = yield (0, WaitBot_1.waitForBot)(port); //espera por la inicializacion del bot
+                console.log(botData);
                 // Registrar el Bot
                 const newBot = yield Bot_1.Bot.create({
                     containerId: container.id,
+                    name: namebot.toLowerCase(),
                     port,
                     pairingCode: botData.pairingCode,
                     phone,
@@ -121,6 +125,13 @@ class BotController {
                         });
                     }
                 }
+                yield Bot_1.Bot.update({
+                    status: true
+                }, {
+                    where: {
+                        status: false
+                    }
+                });
                 res.status(200).json({
                     message: "Procesamiento de bots completado",
                     status: true,
@@ -156,6 +167,13 @@ class BotController {
                         };
                     }
                 })));
+                yield Bot_1.Bot.update({
+                    status: false
+                }, {
+                    where: {
+                        status: true
+                    }
+                });
                 // Retornar los resultados de la operación
                 res.status(200).json({
                     message: "Operación completada. Resultado de detener los bots:",
@@ -185,6 +203,13 @@ class BotController {
                 }
                 // Iniciar el contenedor
                 yield container.start();
+                yield Bot_1.Bot.update({
+                    status: true
+                }, {
+                    where: {
+                        containerId
+                    }
+                });
                 res.status(200).json({
                     message: "Bot iniciado correctamente.",
                     containerId,
@@ -217,6 +242,13 @@ class BotController {
                 }
                 // Detener el contenedor
                 yield container.stop();
+                yield Bot_1.Bot.update({
+                    status: false
+                }, {
+                    where: {
+                        containerId
+                    }
+                });
                 res.status(200).json({
                     message: "Bot detenido correctamente.",
                     containerId,
@@ -235,6 +267,8 @@ class BotController {
         this.getBots = (_req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const bots = yield Bot_1.Bot.findAll();
+                if (!bots)
+                    return res.status(404).json({ message: 'no hay bots' });
                 const docker = DockerService_1.default.getInstance().getDocker();
                 const botsWithStatus = yield Promise.all(bots.map((bot) => __awaiter(this, void 0, void 0, function* () {
                     const container = docker.getContainer(bot.containerId);
@@ -271,6 +305,56 @@ class BotController {
         this.getprueba = (_req, res) => __awaiter(this, void 0, void 0, function* () {
             const port = yield (0, getLastPort_1.getLastPort)();
             return res.status(200).json({ port });
+        });
+        this.search = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const { search } = req.body;
+            const { imagebot } = req.query;
+            const botsSearch = yield Bot_1.Bot.findAll({
+                where: {
+                    name: {
+                        [sequelize_1.Op.like]: `%${search.toLowerCase()}%`
+                    },
+                    tipo: imagebot
+                }
+            });
+            return res.status(200).json({ bots: botsSearch });
+        });
+        this.deleteCache = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const { id } = req.params;
+            try {
+                const bot = yield Bot_1.Bot.findOne({ where: { id } });
+                if (!bot)
+                    return res.status(404).json({ error: 'no se encuentra el bot' });
+                const docker = DockerService_1.default.getInstance().getDocker();
+                const container = docker.getContainer(bot.containerId);
+                const exec = yield container.exec({
+                    Cmd: ['sh', '-c', 'rm -rf /app/bot_sessions/* && echo "Deleted"'],
+                    AttachStdout: true,
+                    AttachStderr: true
+                });
+                const stream = yield exec.start({});
+                stream.on('data', (data) => {
+                    console.log('stdout:', data.toString());
+                });
+                stream.on('error', (err) => {
+                    console.error('Error en la ejecución:', err);
+                });
+                stream.on('end', () => __awaiter(this, void 0, void 0, function* () {
+                    console.log('Contenido de la carpeta /app/bot_sessions borrado.');
+                    yield container.stop();
+                    yield (bot === null || bot === void 0 ? void 0 : bot.update({
+                        status: false
+                    }));
+                    // Responder al cliente después de la ejecución exitosa
+                    res.status(200).json({
+                        message: "Contenido de la carpeta 'sessions' borrado y contenedor detenido con éxito.",
+                    });
+                }));
+            }
+            catch (error) {
+                console.error('Error al eliminar la caché y detener el contenedor:', error);
+                res.status(500).json({ error: "Ocurrió un error al eliminar la caché o detener el contenedor." });
+            }
         });
     }
 }

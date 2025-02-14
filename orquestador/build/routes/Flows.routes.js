@@ -8,6 +8,9 @@ const FlowsController_1 = __importDefault(require("../controllers/flows/FlowsCon
 const FlowsRouter = (0, express_1.Router)();
 const flowsController = new FlowsController_1.default();
 FlowsRouter.get("", flowsController.listar);
+FlowsRouter.get("/:id", flowsController.getById);
 FlowsRouter.post("", flowsController.create);
 FlowsRouter.delete("/:id", flowsController.delete);
+FlowsRouter.post("/search", flowsController.search);
+FlowsRouter.put("/:id", flowsController.update);
 exports.default = FlowsRouter;

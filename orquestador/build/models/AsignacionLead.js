@@ -9,55 +9,50 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Leads = void 0;
+exports.AsignacionLead = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
-const Flows_1 = require("./Flows");
-let Leads = class Leads extends sequelize_typescript_1.Model {
+const Asignaciones_1 = require("./Asignaciones");
+const Leads_1 = require("./Leads");
+let AsignacionLead = class AsignacionLead extends sequelize_typescript_1.Model {
 };
-exports.Leads = Leads;
+exports.AsignacionLead = AsignacionLead;
 __decorate([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Leads.prototype, "name", void 0);
+    (0, sequelize_typescript_1.BelongsTo)(() => Asignaciones_1.Asignaciones),
+    __metadata("design:type", Asignaciones_1.Asignaciones)
+], AsignacionLead.prototype, "asignacion", void 0);
 __decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Unique)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Leads.prototype, "number", void 0);
-__decorate([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    __metadata("design:type", String)
-], Leads.prototype, "email", void 0);
-__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => Flows_1.Flows),
-    __metadata("design:type", Flows_1.Flows)
-], Leads.prototype, "flow", void 0);
-__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => Flows_1.Flows),
+    (0, sequelize_typescript_1.ForeignKey)(() => Asignaciones_1.Asignaciones),
     (0, sequelize_typescript_1.AllowNull)(true),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
     __metadata("design:type", Number)
-], Leads.prototype, "flowId", void 0);
+], AsignacionLead.prototype, "asignacionId", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => Leads_1.Leads),
+    __metadata("design:type", Leads_1.Leads)
+], AsignacionLead.prototype, "lead", void 0);
+__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => Leads_1.Leads),
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], AsignacionLead.prototype, "leadId", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(true),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
     __metadata("design:type", String)
-], Leads.prototype, "curso", void 0);
+], AsignacionLead.prototype, "status", void 0);
 __decorate([
     (0, sequelize_typescript_1.AllowNull)(true),
     (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
     __metadata("design:type", String)
-], Leads.prototype, "respuesta", void 0);
+], AsignacionLead.prototype, "observacionstatus", void 0);
 __decorate([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.BOOLEAN),
-    __metadata("design:type", Boolean)
-], Leads.prototype, "status", void 0);
-exports.Leads = Leads = __decorate([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], AsignacionLead.prototype, "delay", void 0);
+exports.AsignacionLead = AsignacionLead = __decorate([
     (0, sequelize_typescript_1.Table)({
-        tableName: "leads"
+        tableName: 'asignacioneslead'
     })
-], Leads);
+], AsignacionLead);

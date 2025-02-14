@@ -18,51 +18,62 @@ const Flows_1 = require("../../models/Flows");
 const Leads_1 = require("../../models/Leads");
 const xlsx_1 = __importDefault(require("xlsx"));
 const sequelize_1 = require("sequelize");
+const GoogleSheet_1 = require("../../services/GoogleSheet");
+const MasivoLead_1 = require("../../models/MasivoLead");
+const Masivos_1 = require("../../models/Masivos");
 class LeadsController {
     constructor() {
         this.RegisterLead = (req, res) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             try {
                 const { name, phone, respuesta } = req.body;
-                if (respuesta == "interesado") {
-                    const bot = yield Bot_1.Bot.findAll({
-                        where: {
-                            tipo: "responder",
-                        },
-                        limit: 1,
+                const bot = yield Bot_1.Bot.findAll({
+                    where: {
+                        tipo: "responder",
+                    },
+                    limit: 1,
+                });
+                const lead = yield Leads_1.Leads.findOne({ where: { number: phone } });
+                if (bot && lead) {
+                    lead.update({
+                        name,
+                        number: phone,
+                        respuesta,
                     });
-                    if (bot) {
-                        yield Leads_1.Leads.update({
-                            name,
-                            number: phone,
-                            respuesta,
-                        }, {
-                            where: {
-                                number: phone,
-                            },
-                        });
-                        const lead = yield Leads_1.Leads.findOne({
-                            where: { number: phone },
-                        });
-                        if (lead) {
-                            const botResponse = yield fetch(`http://localhost:${bot[0].port}/v1/messages`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    number: phone,
-                                    flow: (_a = lead.flowId) !== null && _a !== void 0 ? _a : 0,
-                                }),
+                    const masivolead = yield MasivoLead_1.MasivoLead.findOne({
+                        where: {
+                            leadId: lead.id
+                        },
+                        order: [["createdAt", "DESC"]]
+                    });
+                    if (masivolead) {
+                        yield masivolead.update({ status: respuesta, });
+                        if (respuesta == "interesado") {
+                            yield Masivos_1.Masivos.update({
+                                amountinteres: sequelize_1.Sequelize.literal("amountinteres + 1"), //aumentar en 1 al valor actual
+                            }, {
+                                where: {
+                                    id: masivolead.masivoId
+                                }
                             });
-                            if (!botResponse.ok) {
-                                return res
-                                    .status(500)
-                                    .json({ error: "No se pudo enviar el mensaje al bot." });
-                            }
                         }
                     }
-                    else {
-                        console.warn("No se encontró un bot disponible del tipo 'responder'.");
+                    const botResponse = yield fetch(`http://localhost:${bot[0].port}/v1/messages`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            number: phone,
+                            flow: (_a = lead.flowId) !== null && _a !== void 0 ? _a : 0,
+                        }),
+                    });
+                    if (!botResponse.ok) {
+                        return res
+                            .status(500)
+                            .json({ error: "No se pudo enviar el mensaje al bot." });
                     }
+                }
+                else {
+                    console.warn("No se encontró un bot disponible del tipo 'responder'.");
                 }
                 return res
                     .status(201)
@@ -86,10 +97,9 @@ class LeadsController {
             return res.status(200).json({ lead });
         });
         this.updatebynumber = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            //punto final de mi proceso masivo
             try {
                 const { phone, curso } = req.body;
-                console.log(phone);
-                console.log(curso);
                 yield Leads_1.Leads.update({
                     curso,
                 }, {
@@ -97,6 +107,8 @@ class LeadsController {
                         number: phone,
                     },
                 });
+                const sheetInstance = yield GoogleSheet_1.GoogleSheet.getInstance();
+                yield sheetInstance.addRow(phone, curso);
                 return res.status(201).json({ message: "actualizado correctamente" });
             }
             catch (error) {
@@ -154,6 +166,17 @@ class LeadsController {
                     .json({
                     error: "ocurrio un error en el proceso de generacion del excel",
                 });
+            }
+        });
+        this.cantRestanteParaMasivos = (_req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const restante = yield Leads_1.Leads.count({ where: { status: false } });
+                console.log(restante);
+                return res.status(200).json({ cant: restante });
+            }
+            catch (error) {
+                console.log("error al obtener el restante", error);
+                return res.status(500).json({ message: "error interno del servidor", error: error.menssage });
             }
         });
     }

@@ -6,6 +6,10 @@ import RabbitMQService from "./services/RabbitMQService";
 import { GoogleSheet } from "./services/GoogleSheet";
 import { createServer } from "http";
 import { WebSocketBots } from "./services/WebSocketBots";
+import { Worker } from "bullmq";
+import { connection } from "./config/redisconfig";
+import { sendAsignacionProgramada } from "./services/SendAsignacionProgramada";
+
 async function main(): Promise<void> {
   try {
     //sincronizacion con db
@@ -30,6 +34,14 @@ async function main(): Promise<void> {
       }
     );
 
+    new Worker(
+      "taskQueue",
+      async (job: any) => {
+        console.log(`✅ Ejecutando tarea #${job.id} - ${new Date().toISOString()}`);
+        await sendAsignacionProgramada(job.data);
+      },
+      { connection}
+    );
     //escucha del servidor en puerto 8000
     httpServer.listen(8000, '0.0.0.0', () => {
       console.log(`Server is running on http://localhost:8000`);
