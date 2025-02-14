@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table, Unique } from "sequelize-typescript";
 import { Flows } from "./Flows";
 
 @Table({
@@ -11,6 +11,7 @@ export class Leads extends Model{
     name!: string;
 
     @AllowNull(false)
+    @Unique(true)
     @Column(DataType.STRING)
     number!: string;
 

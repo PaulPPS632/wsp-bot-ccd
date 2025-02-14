@@ -9,11 +9,14 @@ export class AsignacionesController {
       const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
 
       if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
-      const numbers = numeros.map((numero: any) => ({ number: numero }));
+      //const numbers = numeros.map((numero: any) => ({ number: numero }));
 
-      await Leads.bulkCreate(numbers, {
-        ignoreDuplicates: true,
-      });
+      for (const numero of numeros) {
+        await Leads.findOrCreate({
+          where: { number: numero },
+          defaults: { number: numero , status: true},
+        });
+      }
 
       const clientes = await Leads.findAll({
         where: { number: numeros },
@@ -21,7 +24,7 @@ export class AsignacionesController {
 
       const newasignacion = await Asignaciones.create({
         name,
-        amountsend: numbers.length,
+        amountsend: numeros.length,
         botId: bot.id,
         flowId: flow.id,
       }) 

@@ -61,7 +61,7 @@ export class ReportsController {
             fechaenvio: masivolead.createdAt,
             leadName: masivolead.lead.name,
             leadPhone: masivolead.lead.number,
-            leadCurso: masivolead.lead.flow.name,
+            leadCurso: masivolead.lead.curso,
             status: masivolead.status
         }));
         return res.status(200).json({ leadsinteresados: formattedMasivos});
