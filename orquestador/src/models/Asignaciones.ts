@@ -29,4 +29,11 @@ export class Asignaciones extends Model{
     @Column(DataType.INTEGER)
     flowId!: number
 
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    delaymin!: number;
+
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    delaymax!: number;
 }

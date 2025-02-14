@@ -2,6 +2,7 @@ import { AsignacionLead } from "../../models/AsignacionLead";
 import { Asignaciones } from "../../models/Asignaciones";
 import { Leads } from "../../models/Leads";
 import RabbitMQService from "../../services/RabbitMQService";
+import { TaskQueueService } from "../../services/TaskQueueService";
 
 export class AsignacionesController {
   sendAsignaciones = async (req: any, res: any) => {
@@ -110,4 +111,63 @@ export class AsignacionesController {
         });
     }
   };
+  ProgramarAsignacion = async(req: any, res: any) => {
+    try {
+      const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
+      const { programacion } = req.body;
+      console.log("fecha de programacion", programacion);
+      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
+      const numbers = numeros.map((numero: any) => ({ number: numero }));
+
+      await Leads.bulkCreate(numbers, {
+        ignoreDuplicates: true,
+      });
+
+      const clientes = await Leads.findAll({
+        where: { number: numeros },
+      });
+
+      const newasignacion = await Asignaciones.create({
+        name,
+        amountsend: numbers.length,
+        botId: bot.id,
+        flowId: flow.id,
+        delaymin: delaymin,
+        delaymax: delaymax
+      }) 
+      
+      const asigbulk = numeros
+        .map((numero: any) => {
+          const cliente = clientes.find((c) => c.number === numero);
+          const cantdelay =
+          (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
+          1000;
+          return cliente
+            ? {
+                asignacionId: newasignacion.id,
+                clienteId: cliente.id,
+                status: "PENDIENTE",
+                delay: cantdelay
+              }
+            : null;
+        })
+        .filter((item: any) => item !== null);
+
+      await AsignacionLead.bulkCreate(asigbulk);
+
+      const taskQueueService = new TaskQueueService();
+      await taskQueueService.scheduleTask(programacion, newasignacion.id);
+      return res
+        .status(200)
+        .json({ message: `Asignacion programada`});
+    } catch (error: any) {
+      console.log("error en envio de asignaciones", error.message);
+      return res
+        .status(500)
+        .json({
+          message: "error en envio de asignaciones",
+          error: error.menssage,
+        });
+    }
+  }
 }
