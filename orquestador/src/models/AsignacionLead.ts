@@ -15,7 +15,6 @@ export class AsignacionLead extends Model {
     @Column(DataType.INTEGER)
     asignacionId!: number
 
-
     @BelongsTo(() => Leads)
     lead!: Leads;
 
@@ -31,4 +30,8 @@ export class AsignacionLead extends Model {
     @AllowNull(true)
     @Column(DataType.STRING)
     observacionstatus!: string;
+
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    delay!: number;
 }

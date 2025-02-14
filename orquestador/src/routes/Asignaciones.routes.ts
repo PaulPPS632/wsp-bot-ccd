@@ -7,5 +7,5 @@ const asignacionesController = new AsignacionesController()
 
 AsignacionesRouter.post("", asignacionesController.sendAsignaciones);
 AsignacionesRouter.post("failmessage", asignacionesController.FailMessage)
-
+AsignacionesRouter.post("/programacion", asignacionesController.ProgramarAsignacion)
 export default AsignacionesRouter;
