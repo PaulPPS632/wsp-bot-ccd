@@ -3,7 +3,10 @@ import { createBot, createProvider, createFlow, addKeyword, utils, EVENTS } from
 import { MysqlAdapter as Database } from "@builderbot/database-mysql";
 import { BaileysProvider as Provider } from '@builderbot/provider-baileys'
 import { consultayselectedCurso, selectedCurso } from './cursosSelected'
-
+import fs from "fs";
+import { promisify } from "util";
+const writeFile = promisify(fs.writeFile);
+const unlink = promisify(fs.unlink);
 const PORT = 3000
 const phoneNumber = process.env.PHONE ?? "51948701436";
 
@@ -19,21 +22,8 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
         return endFlow("gracias por su comunicacion")
     }
   );
-  const promoverano = addKeyword<Provider, Database>(utils.setEvent('PROMO_VERANO'))
-  .addAnswer(" ", { media: join(process.cwd(), 'assets', 'flyer_promo_verano.png')})
-  .addAnswer([
-      //'🌞 PROMOCIÓN VERANO - CURSOS Y DIPLOMAS DE INGENIERÍA Y MINERÍA CCD 🌟',
-      '🚨BENEFICIOS INCLUIDOS🚨',
-      '1 Enfoque aplicado al ámbito laboral.',
-      '2 Docente expertos en minería.',
-      '3 Clases en vivo - ZOOM.',
-      '4 Acceso a material exclusivo.',
-      '5 Sesiones prácticas con casos reales',
-      '6 Aula virtual 24/7',
-      '7 Certificado incluido',
-      '💵 DESDE S/299.00',
-      '📲 ¿Quieres aprovechar al máximo esta oportunidad'
-  ].join('\n'),{delay:2000})
+  
+const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
   .addAnswer([
     'Buen día estimado(a) ¿En qué curso estaría interesado(a) para brindarle mayor información?😊📚',
     '👉 porfavor indique el numero del curso que le interesa'
@@ -42,7 +32,7 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
     const body = ctx.body.trim().toLocaleLowerCase();
     const option = parseInt(body, 10);
     if (!isNaN(option)) {
-      const {flag, curso} = await selectedCurso(ctx.from, option, 1);
+      const {flag, curso} = await selectedCurso(ctx.from, option, ctx.cursos);
       if(flag){
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
@@ -56,46 +46,8 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
     }
   },
   [mensajefinal]);
-  const armatupack = addKeyword<Provider, Database>(utils.setEvent('ARMA_TU_PACK'))
-  .addAnswer(" ", { media: join(process.cwd(), 'assets', 'arma_tu_pack.png')})
-  .addAnswer([
-      //'🌞 PROMOCIÓN VERANO - CURSOS Y DIPLOMAS DE INGENIERÍA Y MINERÍA CCD 🌟',
-      '🚀ARMA TU PACK 🚀',
-      '1 Curso o diploma x  S/199 💵',
-      '2 Cursos o diplomas x  S/299 💵',
-      '3 Cursos o diplomas x  S/369 💵',
-      '🚨 BENEFICIOS INCLUIDOS - VÁLIDOS SOLO X 24HRS🚨',
-      '✅ Enfoque aplicado al ámbito laboral.',
-      '✅ Certificado digital gratuito.',
-      '✅ Clases disponibles 24/7.',
-      '✅ Casos reales y prácticos aplicados al ámbito laboral.',
-      '✅ Desct. para certificación acreditada CIP',
-      '👨🏻‍🏫Estudia a tu ritmo y desde cualquier lugar⏳',
-      'No dejes pasar esta oportunidad.',
-      'ARMA TU PACK Y POTENCIA TU PERFIL PROFESIONAL ✅'
-  ].join('\n'))
-  .addAnswer([
-    'Buen día estimado(a) ¿En qué curso estaría interesado(a) para brindarle mayor información?😊📚',
-    '👉 porfavor indique el numero del curso que le interesa, en la imagen del flyer puede escoger'
-  ].join("\n"), {capture: true},
-  async (ctx, { fallBack, gotoFlow, flowDynamic }) => {
-    const body = ctx.body.trim().toLocaleLowerCase();
-    const option = parseInt(body, 10);
-    if (!isNaN(option)) {
-      const {flag, curso} = await selectedCurso(ctx.from, option, 2);
-      if(flag){
-        await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
-        return gotoFlow(mensajefinal);
-      }else{
-        await flowDynamic(`Hubo un error al seleccionar, porfavor intentelo nuevamente`)
-        return fallBack();
-      }
-    } else {
-      await flowDynamic("Estimado(a) porfavor ingrese el numero del curso que le interesa. Puede ver los cursos en el flyer")
-      return fallBack();
-    }
-  },
-  [mensajefinal]);
+
+  
 
 const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
   [
@@ -123,7 +75,7 @@ const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
         [mensajefinal]
       );
 const main = async () => {
-    const adapterFlow = createFlow([promoverano, armatupack, welcome, mensajefinal])
+    const adapterFlow = createFlow([flujo, welcome, mensajefinal])
     const adapterProvider = createProvider(Provider, { usePairingCode: true, phoneNumber})
     const config = {
       host: process.env.DB_HOST ?? '',
@@ -145,6 +97,7 @@ const main = async () => {
         '/v1/messages',
         handleCtx(async (bot, req, res) => {
             const { number, name, flow } = req.body;
+            /*
             switch(flow){
               case 1: 
                 //await bot.provider.sendImage(number, join(process.cwd(), 'assets', 'flyer_promo_verano.png'),"");
@@ -158,7 +111,43 @@ const main = async () => {
                 await bot.provider.sendImage(number, join(process.cwd(), 'assets', 'flyer_promo_verano.png'),"");
                 break;
             }
-            
+            */
+            for(const mensaje of flow.mensajes){
+              try {
+                switch(mensaje.tipo){
+                  case("texto"):
+                    await bot.provider.sendMessage(
+                      number, mensaje.content.body,
+                      {}
+                    );
+                    break;
+
+                  case("imagen"):
+                    await bot.provider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,mensaje.content.footer);
+                    break;
+
+                  case("video"):{
+                    //descargamos el video
+                    const response = await fetch(mensaje.content.body);
+                    
+                    if (!response.ok) throw new Error(`Error al descargar el video: ${response.statusText}`);
+                    const videoBuffer = await response.arrayBuffer();
+                    const filePath = join(process.cwd(), 'assets', `temp_video_${Date.now()}.mp4`) ;
+                    await writeFile(filePath, Buffer.from(videoBuffer));
+                    await adapterProvider.sendVideo(number+ "@s.whatsapp.net", filePath, mensaje.content.footer);
+                    await unlink(filePath);
+                    break;
+                  }
+                  case("documento"):
+                    await adapterProvider.sendFile(number+ "@s.whatsapp.net", mensaje.content.body, mensaje.content.footer);
+                    break;
+                }
+                await utils.delay(300);
+              } catch (error: any) {
+                console.error(`❌ Error al enviar el mensaje de tipo '${mensaje.tipo}':`, error);
+              }
+            }
+            await bot.dispatch('FLUJO', { from: number, name, cursos: flow.cursos })
             return res.end('sended')
         })
     )

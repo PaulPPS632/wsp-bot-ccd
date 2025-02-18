@@ -1,7 +1,11 @@
 import { utils } from "@builderbot/bot"
 import { connectRabbitMQ } from "./rabbitmqConfig"
 import { BaileysProvider } from "@builderbot/provider-baileys";
+import fs from "fs";
+import { promisify } from "util";
 import { join } from "path";
+const writeFile = promisify(fs.writeFile);
+const unlink = promisify(fs.unlink);
 
 export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta_local_orquestador: string) => {
     try {
@@ -23,20 +27,43 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
           if (onWhats[0]?.exists) {
             try {
               console.log(`Enviando mensaje a:`, number);
-              if(flow.id == 1){
-                await adapterProvider.sendMedia(number+ "@s.whatsapp.net",join(process.cwd(), 'assets', 'flyer_promo_verano.png'),'')
-              }else{
-                await adapterProvider.sendMedia(number+ "@s.whatsapp.net",join(process.cwd(), 'assets', 'arma_tu_pack.png'),'')
+              for(const mensaje of flow.mensajes){
+                try {
+                  switch(mensaje.tipo){
+                    case("texto"):
+                      await adapterProvider.sendMessage(
+                        number, mensaje.content.body,
+                        {}
+                      );
+                      break;
+  
+                    case("imagen"):
+                      await adapterProvider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,mensaje.content.footer);
+                      break;
+  
+                    case("video"):{
+                      //descargamos el video
+                      const response = await fetch(mensaje.content.body);
+                      
+                      if (!response.ok) throw new Error(`Error al descargar el video: ${response.statusText}`);
+                      const videoBuffer = await response.arrayBuffer();
+                      const filePath = join(process.cwd(), 'assets', `temp_video_${Date.now()}.mp4`) ;
+                      await writeFile(filePath, Buffer.from(videoBuffer));
+                      await adapterProvider.sendVideo(number+ "@s.whatsapp.net", filePath, mensaje.content.footer);
+                      await unlink(filePath);
+                      break;
+                    }
+                    case("documento"):
+                      await adapterProvider.sendFile(number+ "@s.whatsapp.net", mensaje.content.body, mensaje.content.footer);
+                      break;
+                  }
+                  await utils.delay(300);
+                } catch (error: any) {
+                  console.error(`❌ Error al enviar el mensaje de tipo '${mensaje.tipo}':`, error);
+                }
+                
               }
               
-             //const ruta ="https://resizing.flixster.com/niYOMxJrorsKHOTGcD-PzbhHo5Y=/fit-in/705x460/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p16473346_b_h8_ad.jpg"
-             
-              for(const mensaje of flow.mensajes){
-                await adapterProvider.sendMessage(
-                  number, mensaje.content.body,
-                  {}
-                );
-              }
               await adapterProvider.sendMessage(
                 number,
                 [
