@@ -6,6 +6,7 @@ import LeadsRouter from "./routes/Leads.routes";
 import FlowsRouter from "./routes/Flows.routes";
 import AsignacionesRouter from "./routes/Asignaciones.routes";
 import ReportsRouter from "./routes/Reports.routes";
+import UsuariosRouter from "./routes/Usuarios.routes";
 class App {
     private server: Application;
     constructor() {
@@ -23,6 +24,7 @@ class App {
     private routes(): void {
       // Configuración de rutas
       //this.server.use("/api", UserRoutes);
+      this.server.use("/api/usuarios", UsuariosRouter);
       this.server.use("/api/bots", BotRouter);
       this.server.use("/api/masivos", MasivosRouter);
       this.server.use("/api/leads", LeadsRouter);

@@ -17,7 +17,14 @@ class LeadsController {
         },
         limit: 1,
       });
-      const lead = await Leads.findOne({where:{number:phone}})
+      const lead = await Leads.findOne({
+        where:{number:phone},
+        include:[
+          {
+            model: Flows
+          }
+        ]
+      })
       if (bot && lead) {
         
         lead.update(
@@ -52,7 +59,7 @@ class LeadsController {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               number: phone,
-              flow: lead.flowId ?? 0,
+              flow: lead.flow,
             }),
           }
         );
@@ -79,11 +86,15 @@ class LeadsController {
   };
   getbytNumber = async (req: any, res: any) => {
     const { number } = req.query;
-    console.log("el numero:", number);
     const lead = await Leads.findOne({
       where: {
         number,
       },
+      include:[
+        {
+          model:Flows
+        }
+      ]
     });
     return res.status(200).json({ lead });
   };

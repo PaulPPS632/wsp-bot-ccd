@@ -35,6 +35,10 @@ export class Leads extends Model{
     @Column(DataType.STRING)
     respuesta!: string;
 
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    metodo!: string;    
+
     @AllowNull(false)
     @Column(DataType.BOOLEAN)
     status!: boolean;

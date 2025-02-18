@@ -50,7 +50,8 @@ class MasivosController {
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
         await Leads.update({
           flowId:flowAleatorio.id,
-          status: true
+          status: true,
+          metodo: "MASIVO"
         },{where:{
           number: lead.number
         }})

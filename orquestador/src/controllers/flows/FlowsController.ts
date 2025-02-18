@@ -8,6 +8,8 @@ class FlowsController {
       await Flows.create({
         name: flow.name.trim(),
         mensajes: flow.mensajes,
+        cursos: flow.cursos,
+        variables: flow.variables
       });
       return res.status(200).json({ message: "creado correctamente" });
     } catch (err: any) {
@@ -65,6 +67,8 @@ class FlowsController {
         {
           name: flow.name.trim().replace(/ /g, "_"),
           mensajes: flow.mensajes,
+          cursos: flow.cursos,
+          variables: flow.variables
         },
         {
           where: {
