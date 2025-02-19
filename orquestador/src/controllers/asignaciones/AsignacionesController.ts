@@ -28,6 +28,7 @@ export class AsignacionesController {
         amountsend: numeros.length,
         botId: bot.id,
         flowId: flow.id,
+        usuarioId: req.data.id
       }) 
       
       const asigbulk = numeros

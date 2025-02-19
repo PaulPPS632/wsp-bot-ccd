@@ -1,6 +1,7 @@
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Bot } from "./Bot";
 import { Flows } from "./Flows";
+import { Usuarios } from "./Usuarios";
 @Table({
     tableName: "asignaciones"
 })
@@ -36,4 +37,12 @@ export class Asignaciones extends Model{
     @AllowNull(true)
     @Column(DataType.INTEGER)
     delaymax!: number;
+
+    @BelongsTo(() => Usuarios)
+    usuario!: Usuarios;
+
+    @ForeignKey(() => Usuarios)
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    usuarioId!: number
 }

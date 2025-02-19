@@ -2,7 +2,7 @@ import { join } from 'path'
 import { createBot, createProvider, createFlow, addKeyword, utils, EVENTS } from '@builderbot/bot'
 import { MysqlAdapter as Database } from "@builderbot/database-mysql";
 import { BaileysProvider as Provider } from '@builderbot/provider-baileys'
-import { consultayselectedCurso, selectedCurso } from './cursosSelected'
+import { consultayselectedCurso } from './cursosSelected'
 import fs from "fs";
 import { promisify } from "util";
 const writeFile = promisify(fs.writeFile);
@@ -32,7 +32,7 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
     const body = ctx.body.trim().toLocaleLowerCase();
     const option = parseInt(body, 10);
     if (!isNaN(option)) {
-      const {flag, curso} = await selectedCurso(ctx.from, option, ctx.cursos);
+      const {flag, curso} = await consultayselectedCurso(ctx.from, option);
       if(flag){
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
@@ -97,21 +97,6 @@ const main = async () => {
         '/v1/messages',
         handleCtx(async (bot, req, res) => {
             const { number, name, flow } = req.body;
-            /*
-            switch(flow){
-              case 1: 
-                //await bot.provider.sendImage(number, join(process.cwd(), 'assets', 'flyer_promo_verano.png'),"");
-                await bot.dispatch('PROMO_VERANO', { from: number, name })
-                break;
-              case 2: 
-                //await bot.provider.sendImage(number, join(process.cwd(), 'assets', 'flyer_promo_verano.png'),"");
-                await bot.dispatch('ARMA_TU_PACK', { from: number, name })
-                break;
-              default:
-                await bot.provider.sendImage(number, join(process.cwd(), 'assets', 'flyer_promo_verano.png'),"");
-                break;
-            }
-            */
             for(const mensaje of flow.mensajes){
               try {
                 switch(mensaje.tipo){
@@ -147,7 +132,7 @@ const main = async () => {
                 console.error(`❌ Error al enviar el mensaje de tipo '${mensaje.tipo}':`, error);
               }
             }
-            await bot.dispatch('FLUJO', { from: number, name, cursos: flow.cursos })
+            await bot.dispatch('FLUJO', { from: number, name})
             return res.end('sended')
         })
     )

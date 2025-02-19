@@ -7,6 +7,7 @@ import FlowsRouter from "./routes/Flows.routes";
 import AsignacionesRouter from "./routes/Asignaciones.routes";
 import ReportsRouter from "./routes/Reports.routes";
 import UsuariosRouter from "./routes/Usuarios.routes";
+//import { Authorization } from "./middlewares/Authorization";
 class App {
     private server: Application;
     constructor() {
@@ -24,13 +25,14 @@ class App {
     private routes(): void {
       // Configuración de rutas
       //this.server.use("/api", UserRoutes);
-      this.server.use("/api/usuarios", UsuariosRouter);
-      this.server.use("/api/bots", BotRouter);
+      this.server.use("/api/auth", UsuariosRouter);
+      //this.server.use(Authorization);
+      this.server.use("/api/bots",BotRouter);
       this.server.use("/api/masivos", MasivosRouter);
-      this.server.use("/api/leads", LeadsRouter);
-      this.server.use("/api/flows", FlowsRouter);
-      this.server.use("/api/asignaciones", AsignacionesRouter)
-      this.server.use("/api/reports", ReportsRouter);
+      this.server.use("/api/leads",  LeadsRouter);
+      this.server.use("/api/flows",  FlowsRouter);
+      this.server.use("/api/asignaciones",  AsignacionesRouter)
+      this.server.use("/api/reports",  ReportsRouter);
     }
     public getServer(): Application {
       return this.server;

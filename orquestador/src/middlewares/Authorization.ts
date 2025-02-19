@@ -17,7 +17,7 @@ export function Authorization(req: any, res: any, next: any) {
     }
     console.log("SECRET_KEY: ", process.env.SECRET_KEY);
     const decode = jwt.verify(token, process.env.SECRET_KEY);
-    req.userId = decode;
+    req.data = decode;
     next();
   } catch (error: any) {
     if (error instanceof jwt.TokenExpiredError) {

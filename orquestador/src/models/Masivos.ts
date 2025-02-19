@@ -1,13 +1,16 @@
 import {
   AllowNull,
+  BelongsTo,
   BelongsToMany,
   Column,
   DataType,
+  ForeignKey,
   Model,
   Table,
 } from "sequelize-typescript";
 import { Flows } from "./Flows";
 import { MasivosFlows } from "./MasivosDlows";
+import { Usuarios } from "./Usuarios";
 
 @Table({
   tableName: "masivos",
@@ -35,4 +38,13 @@ export class Masivos extends Model {
 
   @BelongsToMany(() => Flows, () => MasivosFlows)
   flows!: Flows[];
+
+
+  @BelongsTo(() => Usuarios)
+  usuario!: Usuarios;
+
+  @ForeignKey(() => Usuarios)
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+  usuarioId!: number
 }

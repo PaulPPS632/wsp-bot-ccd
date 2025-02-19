@@ -16,11 +16,6 @@ const updateCursobyPhone = async (phone: string, curso: string): Promise<boolean
         return true;
     }
 }
-export const selectedCurso = async (phone: string ,option: number, cursos: string[]): Promise<{ flag: boolean, curso: string }> => {
-    const curso = cursos[option-1] ?? "NO SE ENCONTRO";
-    const flag = await updateCursobyPhone(phone, curso);
-    return {flag,curso};
-} 
 export const consultayselectedCurso = async (phone: string, option: number):Promise<{ flag: boolean, curso: string }> => {
     const respuesta = await fetch(`http://${ruta_local_orquestador}:8000/api/leads?number=${phone}`, {
         method: "GET",

@@ -11,6 +11,9 @@ class LeadsController {
   RegisterLead = async (req: any, res: any) => {
     try {
       const { name, phone, respuesta } = req.body;
+      console.log("=============================================================");
+      console.log("hay interaccion");
+      console.log("=============================================================");
       const bot = await Bot.findAll({
         where: {
           tipo: "responder",
@@ -41,8 +44,11 @@ class LeadsController {
           order: [["createdAt", "DESC"]]
         })
         if (masivolead) {
-          await masivolead.update({ status: respuesta,  });
-          if(respuesta == "interesado"){
+          await masivolead.update({ status: respuesta });
+          if(masivolead.status != null){
+            console.log("=============================================")
+            console.log("AQUI LLEGA -------------------------");
+            console.log("=============================================")
             await Masivos.update({
               amountinteres : Sequelize.literal("amountinteres + 1"),//aumentar en 1 al valor actual
             },{
@@ -51,7 +57,10 @@ class LeadsController {
               }
             })
           }
+          
+          
         }
+        console.log(bot[0])
         const botResponse = await fetch(
           `http://localhost:${bot[0].port}/v1/messages`,
           {
