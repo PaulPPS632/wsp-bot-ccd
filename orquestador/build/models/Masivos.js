@@ -13,6 +13,7 @@ exports.Masivos = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const Flows_1 = require("./Flows");
 const MasivosDlows_1 = require("./MasivosDlows");
+const Usuarios_1 = require("./Usuarios");
 let Masivos = class Masivos extends sequelize_typescript_1.Model {
 };
 exports.Masivos = Masivos;
@@ -45,6 +46,16 @@ __decorate([
     (0, sequelize_typescript_1.BelongsToMany)(() => Flows_1.Flows, () => MasivosDlows_1.MasivosFlows),
     __metadata("design:type", Array)
 ], Masivos.prototype, "flows", void 0);
+__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => Usuarios_1.Usuarios),
+    __metadata("design:type", Usuarios_1.Usuarios)
+], Masivos.prototype, "usuario", void 0);
+__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => Usuarios_1.Usuarios),
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.INTEGER),
+    __metadata("design:type", Number)
+], Masivos.prototype, "usuarioId", void 0);
 exports.Masivos = Masivos = __decorate([
     (0, sequelize_typescript_1.Table)({
         tableName: "masivos",

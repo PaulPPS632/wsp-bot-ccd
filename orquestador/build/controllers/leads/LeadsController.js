@@ -24,16 +24,25 @@ const Masivos_1 = require("../../models/Masivos");
 class LeadsController {
     constructor() {
         this.RegisterLead = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
             try {
                 const { name, phone, respuesta } = req.body;
+                console.log("=============================================================");
+                console.log("hay interaccion");
+                console.log("=============================================================");
                 const bot = yield Bot_1.Bot.findAll({
                     where: {
                         tipo: "responder",
                     },
                     limit: 1,
                 });
-                const lead = yield Leads_1.Leads.findOne({ where: { number: phone } });
+                const lead = yield Leads_1.Leads.findOne({
+                    where: { number: phone },
+                    include: [
+                        {
+                            model: Flows_1.Flows
+                        }
+                    ]
+                });
                 if (bot && lead) {
                     lead.update({
                         name,
@@ -47,8 +56,11 @@ class LeadsController {
                         order: [["createdAt", "DESC"]]
                     });
                     if (masivolead) {
-                        yield masivolead.update({ status: respuesta, });
-                        if (respuesta == "interesado") {
+                        yield masivolead.update({ status: respuesta });
+                        if (masivolead.status != null) {
+                            console.log("=============================================");
+                            console.log("AQUI LLEGA -------------------------");
+                            console.log("=============================================");
                             yield Masivos_1.Masivos.update({
                                 amountinteres: sequelize_1.Sequelize.literal("amountinteres + 1"), //aumentar en 1 al valor actual
                             }, {
@@ -58,12 +70,13 @@ class LeadsController {
                             });
                         }
                     }
+                    console.log(bot[0]);
                     const botResponse = yield fetch(`http://localhost:${bot[0].port}/v1/messages`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             number: phone,
-                            flow: (_a = lead.flowId) !== null && _a !== void 0 ? _a : 0,
+                            flow: lead.flow,
                         }),
                     });
                     if (!botResponse.ok) {
@@ -88,11 +101,15 @@ class LeadsController {
         });
         this.getbytNumber = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { number } = req.query;
-            console.log("el numero:", number);
             const lead = yield Leads_1.Leads.findOne({
                 where: {
                     number,
                 },
+                include: [
+                    {
+                        model: Flows_1.Flows
+                    }
+                ]
             });
             return res.status(200).json({ lead });
         });

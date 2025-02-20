@@ -9,6 +9,8 @@ const Leads_1 = require("./Leads");
 const MasivoLead_1 = require("./MasivoLead");
 const Masivos_1 = require("./Masivos");
 const MasivosDlows_1 = require("./MasivosDlows");
+const Roles_1 = require("./Roles");
+const Usuarios_1 = require("./Usuarios");
 exports.models = [
     Bot_1.Bot,
     Asignaciones_1.Asignaciones,
@@ -17,5 +19,7 @@ exports.models = [
     Leads_1.Leads,
     Masivos_1.Masivos,
     MasivosDlows_1.MasivosFlows,
-    MasivoLead_1.MasivoLead
+    MasivoLead_1.MasivoLead,
+    Usuarios_1.Usuarios,
+    Roles_1.Roles
 ];

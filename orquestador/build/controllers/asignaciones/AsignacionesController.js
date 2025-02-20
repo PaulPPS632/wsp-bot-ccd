@@ -29,7 +29,7 @@ class AsignacionesController {
                 for (const numero of numeros) {
                     yield Leads_1.Leads.findOrCreate({
                         where: { number: numero },
-                        defaults: { number: numero, status: true },
+                        defaults: { number: numero, status: true, metodo: "ASIGNACION" },
                     });
                 }
                 const clientes = yield Leads_1.Leads.findAll({
@@ -40,6 +40,7 @@ class AsignacionesController {
                     amountsend: numeros.length,
                     botId: bot.id,
                     flowId: flow.id,
+                    usuarioId: req.data.id
                 });
                 const asigbulk = numeros
                     .map((numero) => {
@@ -123,16 +124,18 @@ class AsignacionesController {
                 console.log("fecha de programacion", programacion);
                 if (numeros.length == 0)
                     return res.status(400).json({ error: "no puedes enviar una asignacion sin numeros de destino" });
-                const numbers = numeros.map((numero) => ({ number: numero }));
-                yield Leads_1.Leads.bulkCreate(numbers, {
-                    ignoreDuplicates: true,
-                });
+                for (const numero of numeros) {
+                    yield Leads_1.Leads.findOrCreate({
+                        where: { number: numero },
+                        defaults: { number: numero, status: true, metodo: "ASIGNACION" },
+                    });
+                }
                 const clientes = yield Leads_1.Leads.findAll({
                     where: { number: numeros },
                 });
                 const newasignacion = yield Asignaciones_1.Asignaciones.create({
                     name,
-                    amountsend: numbers.length,
+                    amountsend: numeros.length,
                     botId: bot.id,
                     flowId: flow.id,
                     delaymin: delaymin,

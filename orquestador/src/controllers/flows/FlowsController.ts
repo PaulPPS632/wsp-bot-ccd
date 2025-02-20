@@ -18,9 +18,25 @@ class FlowsController {
         .json({ error: `error en servidor: ${err.message}` });
     }
   };
-  listar = async (_req: any, res: any) => {
+  listar = async (req: any, res: any) => {
     try {
-      const flows = await Flows.findAll();
+      const { masivos } = req.query;
+      let flows;
+      if(masivos){
+        flows = await Flows.findAll({
+          where:{
+            cursos: {
+              [Op.and]:[
+                {[Op.ne]: ''},
+                {[Op.ne]: null}
+              ]
+            }
+          }
+      });
+      }else{
+        flows = await Flows.findAll();//todos
+      }
+      
       if (!flows)
         return res.status(404).json({ error: "no se encontraron flows" });
       return res.status(200).json({ flows });
@@ -63,9 +79,10 @@ class FlowsController {
     try {
       const { id } = req.params;
       const { flow } = req.body;
+      console.log(flow);
       await Flows.update(
         {
-          name: flow.name.trim().replace(/ /g, "_"),
+          name: flow.name.trim(),
           mensajes: flow.mensajes,
           cursos: flow.cursos,
           variables: flow.variables

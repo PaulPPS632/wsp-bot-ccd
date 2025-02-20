@@ -27,6 +27,16 @@ __decorate([
     __metadata("design:type", String)
 ], Flows.prototype, "mensajes", void 0);
 __decorate([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.JSON),
+    __metadata("design:type", String)
+], Flows.prototype, "cursos", void 0);
+__decorate([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.JSON),
+    __metadata("design:type", String)
+], Flows.prototype, "variables", void 0);
+__decorate([
     (0, sequelize_typescript_1.BelongsToMany)(() => Masivos_1.Masivos, () => MasivosDlows_1.MasivosFlows),
     __metadata("design:type", Array)
 ], Flows.prototype, "masivos", void 0);

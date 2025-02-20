@@ -19,6 +19,8 @@ class FlowsController {
                 yield Flows_1.Flows.create({
                     name: flow.name.trim(),
                     mensajes: flow.mensajes,
+                    cursos: flow.cursos,
+                    variables: flow.variables
                 });
                 return res.status(200).json({ message: "creado correctamente" });
             }
@@ -28,9 +30,25 @@ class FlowsController {
                     .json({ error: `error en servidor: ${err.message}` });
             }
         });
-        this.listar = (_req, res) => __awaiter(this, void 0, void 0, function* () {
+        this.listar = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const flows = yield Flows_1.Flows.findAll();
+                const { masivos } = req.query;
+                let flows;
+                if (masivos) {
+                    flows = yield Flows_1.Flows.findAll({
+                        where: {
+                            cursos: {
+                                [sequelize_1.Op.and]: [
+                                    { [sequelize_1.Op.ne]: '' },
+                                    { [sequelize_1.Op.ne]: null }
+                                ]
+                            }
+                        }
+                    });
+                }
+                else {
+                    flows = yield Flows_1.Flows.findAll(); //todos
+                }
                 if (!flows)
                     return res.status(404).json({ error: "no se encontraron flows" });
                 return res.status(200).json({ flows });
@@ -73,9 +91,12 @@ class FlowsController {
             try {
                 const { id } = req.params;
                 const { flow } = req.body;
+                console.log(flow);
                 yield Flows_1.Flows.update({
-                    name: flow.name.trim().replace(/ /g, "_"),
+                    name: flow.name.trim(),
                     mensajes: flow.mensajes,
+                    cursos: flow.cursos,
+                    variables: flow.variables
                 }, {
                     where: {
                         id,

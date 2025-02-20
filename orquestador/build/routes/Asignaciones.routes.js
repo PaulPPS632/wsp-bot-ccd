@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AsignacionesController_1 = require("../controllers/asignaciones/AsignacionesController");
+const Authorization_1 = require("../middlewares/Authorization");
 const AsignacionesRouter = (0, express_1.Router)();
 const asignacionesController = new AsignacionesController_1.AsignacionesController();
-AsignacionesRouter.post("", asignacionesController.sendAsignaciones);
+AsignacionesRouter.post("", Authorization_1.Authorization, asignacionesController.sendAsignaciones);
 AsignacionesRouter.post("/failmessage", asignacionesController.FailMessage);
 AsignacionesRouter.post("/programacion", asignacionesController.ProgramarAsignacion);
 exports.default = AsignacionesRouter;

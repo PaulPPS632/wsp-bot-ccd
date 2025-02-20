@@ -41,6 +41,8 @@ class MasivosController {
                     amountsend: masivos.cant,
                     delaymin: masivos.delaymin,
                     delaymax: masivos.delaymax,
+                    usuarioId: req.data.id,
+                    amountinteres: 0
                 });
                 // Registrar relación con flows
                 if (masivos.flows && masivos.flows.length > 0) {
@@ -56,7 +58,8 @@ class MasivosController {
                     yield rabbitMQ.sendMessage(queue, JSON.stringify(message));
                     yield Leads_1.Leads.update({
                         flowId: flowAleatorio.id,
-                        status: true
+                        status: true,
+                        metodo: "MASIVO"
                     }, { where: {
                             number: lead.number
                         } });
