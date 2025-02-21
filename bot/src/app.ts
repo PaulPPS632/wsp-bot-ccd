@@ -13,9 +13,9 @@ import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
 const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';
-const interesado = addKeyword([EVENTS.ACTION, "1"],{ sensitive: true })
+const interesado = addKeyword([EVENTS.ACTION, "1", "asesor", "lista", "cursos", "precio","si","promoción","promo","información"],{ sensitive: false })
   .addAnswer(
-    "📝☎Listo estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 822 842 (WhatsApp verificado) 👩🏻‍💻.",
+    "📝☎Perfecto estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 911 275 (WhatsApp verificado) 👩🏻‍💻.",
     { capture: false }
   )
   .addAction(async (ctx) => {
@@ -32,29 +32,10 @@ const interesado = addKeyword([EVENTS.ACTION, "1"],{ sensitive: true })
     });
     return;
   });
-const interesadoasesor = addKeyword([EVENTS.ACTION, "2"],{ sensitive: true })
-  .addAnswer(
-    "📝☎Listo estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 822 842 (WhatsApp verificado) 👩🏻‍💻.",
-    { capture: false }
-  )
-  .addAction(async (ctx) => {
-    const name = ctx.name;
-    const phone = ctx.from;
-    await fetch(`http://${ruta_local_orquestador}:8000/api/leads`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        phone,
-        respuesta: "interesado asesor",
-      }),
-    });
-    return;
-  });
-const nointeresado = addKeyword([EVENTS.ACTION, "3"], {sensitive:true}).addAnswer(
+const nointeresado = addKeyword([EVENTS.ACTION, "2", "no"], {sensitive:true}).addAnswer(
   [
     "📝Muy bien estimado, si estuviera interesado no dude en escribirnos y con gusto lo atenderemos 🙋🏻‍♀",
-    "📌Le adjunto el número 908822842",
+    "📌Le adjunto el número de asesor 908 911 275",
   ].join("\n"),
   { capture: false }
 ).addAction(async (ctx) => {
@@ -74,12 +55,14 @@ const nointeresado = addKeyword([EVENTS.ACTION, "3"], {sensitive:true}).addAnswe
 
 const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
   [
-    "Somos CCD si esta interesado en algun curso",
-    "✅ ¡Responde con el número de tu opción y te atenderemos de inmediato!",
-    "🚨 Selecciona una opción:",
-    "👉 1 Conocer más detalles.",
-    "👉 2 Hablar con un asesor.",
-    "👉 3 No continuar por ahora.",
+    "🚨 Por favor, digite la opción 1 ó 2 de su interés ",
+    "",
+    "👉 1. SI ✅ Solicita un asesor",
+    "👉 2. NO ❌ No deseo",
+    "",
+    "¡Transforma tu futuro hoy! ¡Certifícate ya! 🎓",
+    "",
+    "Si deseas más información, comunícate al siguiente número: 908 911 275 o a mediante el link 👉 wa.link/v7wuhv"
   ].join("\n"),
   { capture: true },
   async (ctx, { fallBack, gotoFlow }) => {
@@ -88,18 +71,16 @@ const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
     if (body.includes("1")) {
       return gotoFlow(interesado);
     } else if (body.includes("2")) {
-      return gotoFlow(interesadoasesor);
-    } else if (body.includes("3")) {
       return gotoFlow(nointeresado);
     } else {
       return fallBack();
     }
   },
-  [interesado, nointeresado, interesadoasesor]
+  [interesado, nointeresado]
 );
 
 const main = async () => {
-  const adapterFlow = createFlow([welcome, interesado, nointeresado, interesadoasesor]);
+  const adapterFlow = createFlow([welcome, interesado, nointeresado]);
 
   const adapterProvider = await createProvider(Provider, {
     usePairingCode: true,

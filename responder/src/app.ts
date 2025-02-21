@@ -5,10 +5,11 @@ import { BaileysProvider as Provider } from '@builderbot/provider-baileys'
 import { consultayselectedCurso } from './cursosSelected'
 import fs from "fs";
 import { promisify } from "util";
+
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
-const PORT = 3000
-const phoneNumber = process.env.PHONE ?? "51948701436";
+const PORT = 3003
+const phoneNumber = process.env.PHONE ?? "51908911275";
 
 
 
@@ -25,8 +26,7 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
   
 const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
   .addAnswer([
-    'Buen día estimado(a) ¿En qué curso estaría interesado(a) para brindarle mayor información?😊📚',
-    '👉 porfavor indique el numero del curso que le interesa'
+    '👉Por favor, digite número del curso de su interés (ejm  23).'
   ].join("\n"), {capture: true},
   async (ctx, { fallBack, gotoFlow,flowDynamic }) => {
     const body = ctx.body.trim().toLocaleLowerCase();
@@ -49,40 +49,44 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
 
   
 
-const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
-  [
-    'Buen día estimado(a) ¿En qué curso estaría interesado(a) para brindarle mayor información?😊📚',
-    '👉 porfavor indique el numero del curso que le interesa'
-  ].join("\n"),
-        { capture: true },
-        async (ctx, { fallBack, gotoFlow, flowDynamic }) => {
-          const body = ctx.body.trim().toLocaleLowerCase();
-          const option = parseInt(body, 10);
-          if (!isNaN(option)) {
-            const {flag, curso} = await consultayselectedCurso(ctx.from, option);
-            
-            if(flag){
-              await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
-              return gotoFlow(mensajefinal);
-            }else{
-              await flowDynamic(`Hubo un error al seleccionar`)
-              return fallBack();
-            }
-          } else {
-            return fallBack();
-          }
-        },
-        [mensajefinal]
-      );
+const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME)
+.addAnswer("",{capture:true}, 
+  async (ctx,{ endFlow }) =>{
+    const {flag, curso} = await consultayselectedCurso(ctx.from, 1);
+    console.log(flag);
+    if(!flag) return endFlow("")
+  }
+).addAnswer([
+        '👉Por favor, digite número del curso de su interés (ejm  23).'
+      ].join("\n"),
+            { capture: true },
+            async (ctx, { fallBack, gotoFlow, flowDynamic }) => {
+              const body = ctx.body.trim().toLocaleLowerCase();
+              const option = parseInt(body, 10);
+              if (!isNaN(option)) {
+                const {flag, curso} = await consultayselectedCurso(ctx.from, option);
+                
+                if(flag){
+                  await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
+                  return gotoFlow(mensajefinal);
+                }else{
+                  await flowDynamic(`Hubo un error al seleccionar`)
+                  return fallBack();
+                }
+              } else {
+                return fallBack();
+              }
+            },
+            [mensajefinal]);
 const main = async () => {
     const adapterFlow = createFlow([flujo, welcome, mensajefinal])
     const adapterProvider = createProvider(Provider, { usePairingCode: true, phoneNumber})
     const config = {
-      host: process.env.DB_HOST ?? '',
-      user: process.env.DB_USER ?? '',
-      database: process.env.DB_NAME ?? '',
-      password: process.env.DB_PASSWORD ?? '',
-      port: parseInt(process.env.DB_PORT, 10) ?? 3000
+      host: process.env.DB_HOST ?? '127.0.0.1',
+      user: process.env.DB_USER ?? 'paul',
+      database: process.env.DB_NAME ?? 'bot_db_908911275',
+      password: process.env.DB_PASSWORD ?? 'paulp',
+      port: 3306
     }
     console.log(config)
     const adapterDB = new Database(config);
@@ -108,9 +112,11 @@ const main = async () => {
                     break;
 
                   case("imagen"):
-                    await bot.provider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,mensaje.content.footer);
+                    if(mensaje.content.footer !== "noenviarresponder"){
+                      await bot.provider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,"");
+                    }
+                    
                     break;
-
                   case("video"):{
                     //descargamos el video
                     const response = await fetch(mensaje.content.body);

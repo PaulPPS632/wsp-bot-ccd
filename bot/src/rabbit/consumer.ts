@@ -38,9 +38,10 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
                       break;
   
                     case("imagen"):
-                      await adapterProvider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,mensaje.content.footer);
+                      if(mensaje.content.footer !== "noenviarbot"){
+                        await adapterProvider.sendMedia(number+ "@s.whatsapp.net",mensaje.content.body,"");
+                      }                      
                       break;
-  
                     case("video"):{
                       //descargamos el video
                       const response = await fetch(mensaje.content.body);
@@ -67,11 +68,14 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
               await adapterProvider.sendMessage(
                 number,
                 [
-                  "✅ ¡Responde con el número de tu opción y te atenderemos de inmediato!",
-                  "🚨 Selecciona una opción:",
-                  "👉 1 Conocer más detalles.",
-                  "👉 2 Hablar con un asesor.",
-                  "👉 3 No continuar por ahora.",
+                  "🚨 Por favor, digite la opción 1 ó 2 de su interés ",
+                  "",
+                  "👉 1. *SI* ✅ Solicita un asesor",
+                  "👉 2. *NO* ❌ No deseo",
+                  "",
+                  "¡Transforma tu futuro hoy! ¡Certifícate ya! 🎓",
+                  "",
+                  "Si deseas más información, comunícate al siguiente número: 908 911 275 o a mediante el link 👉 wa.link/v7wuhv"
                 ].join("\n"),
                 {}
               );

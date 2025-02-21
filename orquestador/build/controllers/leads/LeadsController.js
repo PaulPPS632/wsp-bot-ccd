@@ -70,7 +70,6 @@ class LeadsController {
                             });
                         }
                     }
-                    console.log(bot[0]);
                     const botResponse = yield fetch(`http://localhost:${bot[0].port}/v1/messages`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },

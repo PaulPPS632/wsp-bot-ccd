@@ -60,7 +60,6 @@ class LeadsController {
           
           
         }
-        console.log(bot[0])
         const botResponse = await fetch(
           `http://localhost:${bot[0].port}/v1/messages`,
           {
@@ -105,6 +104,7 @@ class LeadsController {
         }
       ]
     });
+    console.log(lead);
     return res.status(200).json({ lead });
   };
   updatebynumber = async (req: any, res: any) => {

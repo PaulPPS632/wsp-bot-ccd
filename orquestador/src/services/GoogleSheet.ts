@@ -17,7 +17,7 @@ export class GoogleSheet {
       scopes: SCOPES,
     });
 
-    const SPREADSHEET_ID = "1QTOhQbqhwlSRFSD12nesQAPMDDpBMxPBMLMuZDH0tWo";
+    const SPREADSHEET_ID = "1PzWQDHZ9LKHi0gGFZ6ZT_9hvDG4PSCIEFt2Jm_L24E0";
     this.doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
   }
 
@@ -43,7 +43,7 @@ export class GoogleSheet {
 
   async addRow(num: string, camp: string) {
     try {
-      const sheet = this.doc.sheetsById[1535857939];
+      const sheet = this.doc.sheetsById[1322261515];
 
     // Suponiendo que "NUMERO" está en la columna A y la hoja tiene N filas
     const cellRange = `C1:C${sheet.rowCount}`; // omitiendo encabezado
@@ -61,16 +61,16 @@ export class GoogleSheet {
     if (rowIndex !== null) {
       // Si se encontró, actualiza esa fila
       // Cargar la fila completa (o actualizar directamente las celdas correspondientes)
-      await sheet.loadCells(`C${rowIndex + 1}:E${rowIndex + 1}`);
+      await sheet.loadCells(`C${rowIndex + 1}:F${rowIndex + 1}`);
       sheet.getCell(rowIndex, 2).value = num;
-      sheet.getCell(rowIndex, 3).value = camp; // Asumiendo que CAMPAÑA_PROGRAMA está en la columna B
-      sheet.getCell(rowIndex, 4).value = "WHATSAPP"; // Asumiendo que RED está en la columna C
+      sheet.getCell(rowIndex, 4).value = camp; // Asumiendo que CAMPAÑA_PROGRAMA está en la columna B
+      sheet.getCell(rowIndex, 5).value = "WHATSAPP"; // Asumiendo que RED está en la columna C
       await sheet.saveUpdatedCells();
     } else {
       // Si no se encontró, agrega la fila
       await sheet.addRow({
         NUMERO: num,
-        CAMPAÑA_PROGRAMA: camp,
+        PROGRAMA: camp,
         RED: "WHATSAPP"
       });
     }
