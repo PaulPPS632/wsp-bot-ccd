@@ -78,6 +78,8 @@ class LeadsController {
                             flow: lead.flow,
                         }),
                     });
+                    const sheetInstance = yield GoogleSheet_1.GoogleSheet.getInstance();
+                    yield sheetInstance.addRow(phone, 'SIN CURSO SELECCIONADO');
                     if (!botResponse.ok) {
                         return res
                             .status(500)
@@ -110,6 +112,7 @@ class LeadsController {
                     }
                 ]
             });
+            console.log(lead);
             return res.status(200).json({ lead });
         });
         this.updatebynumber = (req, res) => __awaiter(this, void 0, void 0, function* () {

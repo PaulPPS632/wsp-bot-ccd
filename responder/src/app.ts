@@ -8,7 +8,7 @@ import { promisify } from "util";
 
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
-const PORT = 3003
+const PORT = 3000
 const phoneNumber = process.env.PHONE ?? "51908911275";
 
 
@@ -17,10 +17,10 @@ const mensajefinal = addKeyword([EVENTS.ACTION]).addAnswer(
     [
       "📝Muy bien estimado, hemos registrado el curso que le interesa",
       "📌en unos minutos un *asesor* se estara comunicando con usted",
-      "📌si desea cambiar de curso solo ingrese nuevamente el numero de curso de su preferencia",
     ].join("\n"),
-    { capture: false },async (ctx, {endFlow}) => {
-        return endFlow("gracias por su comunicacion")
+    { capture: false },async (ctx, {endFlow, blacklist}) => {
+      blacklist.add(ctx.from);
+      return endFlow("gracias por su comunicacion")
     }
   );
   
@@ -28,7 +28,7 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
   .addAnswer([
     '👉Por favor, digite número del curso de su interés (ejm  23).'
   ].join("\n"), {capture: true},
-  async (ctx, { fallBack, gotoFlow,flowDynamic }) => {
+  async (ctx, { fallBack, gotoFlow,flowDynamic, blacklist }) => {
     const body = ctx.body.trim().toLocaleLowerCase();
     const option = parseInt(body, 10);
     if (!isNaN(option)) {
@@ -41,6 +41,7 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
         return fallBack();
       }
     } else {
+      blacklist.add(ctx.from);
       await flowDynamic("Estimado(a) porfavor ingrese el numero del curso que le interesa. Puede ver los cursos en el flyer")
       return fallBack();
     }
@@ -49,14 +50,7 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
 
   
 
-const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME)
-.addAnswer("",{capture:true}, 
-  async (ctx,{ endFlow }) =>{
-    const {flag, curso} = await consultayselectedCurso(ctx.from, 1);
-    console.log(flag);
-    if(!flag) return endFlow("")
-  }
-).addAnswer([
+const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer([
         '👉Por favor, digite número del curso de su interés (ejm  23).'
       ].join("\n"),
             { capture: true },

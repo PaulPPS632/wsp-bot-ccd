@@ -13,7 +13,8 @@ import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
 const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';
-const interesado = addKeyword([EVENTS.ACTION, "1", "asesor", "lista", "cursos", "precio","si","promoción","promo","información"],{ sensitive: false })
+const interesado = addKeyword([EVENTS.ACTION, "1", "asesor","Asesor", "lista","Lista", 
+  "Cursos", "precio","Precio","si","Si","SI","promoción","promo","información", "info","Info"],{ sensitive: true })
   .addAnswer(
     "📝☎Perfecto estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 911 275 (WhatsApp verificado) 👩🏻‍💻.",
     { capture: false }
@@ -32,7 +33,7 @@ const interesado = addKeyword([EVENTS.ACTION, "1", "asesor", "lista", "cursos", 
     });
     return;
   });
-const nointeresado = addKeyword([EVENTS.ACTION, "2", "no"], {sensitive:true}).addAnswer(
+const nointeresado = addKeyword([EVENTS.ACTION, "2", "no","NO","No"], {sensitive:true}).addAnswer(
   [
     "📝Muy bien estimado, si estuviera interesado no dude en escribirnos y con gusto lo atenderemos 🙋🏻‍♀",
     "📌Le adjunto el número de asesor 908 911 275",

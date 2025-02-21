@@ -1,5 +1,5 @@
 
-const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '127.0.0.1'; //'172.18.0.1'
+const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1'; //'172.18.0.1'
 const updateCursobyPhone = async (phone: string, curso: string): Promise<boolean> => {
     const respuesta = await fetch(`http://${ruta_local_orquestador}:8000/api/leads`, {
         method: "PUT",

@@ -274,12 +274,15 @@ class BotController {
                     const container = docker.getContainer(bot.containerId);
                     try {
                         const containerInfo = yield container.inspect();
+                        console.log('consultando a bot', bot.phone);
                         return Object.assign(Object.assign({}, bot.toJSON()), { status: containerInfo.State.Running });
                     }
                     catch (error) {
+                        console.log('error consultando a bot', bot.phone);
                         return Object.assign(Object.assign({}, bot.toJSON()), { status: false });
                     }
                 })));
+                console.log(botsWithStatus);
                 res.status(200).json(botsWithStatus);
             }
             catch (error) {

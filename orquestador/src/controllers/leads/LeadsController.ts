@@ -71,6 +71,8 @@ class LeadsController {
             }),
           }
         );
+        const sheetInstance = await GoogleSheet.getInstance();
+        await sheetInstance.addRow(phone, 'SIN CURSO SELECCIONADO');
         if (!botResponse.ok) {
           return res
             .status(500)

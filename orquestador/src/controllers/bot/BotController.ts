@@ -289,14 +289,16 @@ class BotController {
       const botsWithStatus = await Promise.all(
         bots.map(async (bot) => {
           const container = docker.getContainer(bot.containerId);
-
+          
           try {
             const containerInfo = await container.inspect();
+            console.log('consultando a bot', bot.phone);
             return {
               ...bot.toJSON(),
               status: containerInfo.State.Running, // `true` si está en ejecución
             };
           } catch (error) {
+            console.log('error consultando a bot', bot.phone);
             return {
               ...bot.toJSON(),
               status: false,
@@ -304,7 +306,7 @@ class BotController {
           }
         })
       );
-
+      console.log(botsWithStatus);
       res.status(200).json(botsWithStatus);
     } catch (error) {
       console.error("Error al obtener los bots:", error);
