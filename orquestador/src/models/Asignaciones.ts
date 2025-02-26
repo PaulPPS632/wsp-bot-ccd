@@ -30,6 +30,10 @@ export class Asignaciones extends Model{
     @Column(DataType.INTEGER)
     flowId!: number
 
+    @AllowNull(false)
+    @Column(DataType.JSON)
+    currentflow!: string
+
     @AllowNull(true)
     @Column(DataType.INTEGER)
     delaymin!: number;
