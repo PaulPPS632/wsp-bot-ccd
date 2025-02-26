@@ -7,6 +7,7 @@ const MasivosRouter = Router();
 const masivosController = new MasivosController();
 
 MasivosRouter.post("", Authorization,masivosController.SendMasivos);
+MasivosRouter.post("/excel", Authorization,masivosController.SendMasivosExcel);
 MasivosRouter.post("/failmessage", masivosController.FailMessage);
 
 export default MasivosRouter;
