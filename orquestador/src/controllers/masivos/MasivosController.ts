@@ -5,6 +5,81 @@ import { Masivos } from "../../models/Masivos";
 import RabbitMQService from "../../services/RabbitMQService";
 
 class MasivosController {
+  
+  SendMasivosExcel = async (req: any, res: any) => {
+    try{
+      const {masivos, numeros} = req.body;
+      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
+        for (const numero of numeros) {
+          await Leads.findOrCreate({
+            where: { number: numero },
+            defaults: { number: numero , status: true, metodo: "MASIVO"},
+          });
+      }
+
+      const leads = await Leads.findAll({
+        where: { number: numeros },
+      });
+
+      // Enviar mensaje a la cola para cada número
+      const rabbitMQ = await RabbitMQService.getInstance();
+        
+      //registrando masivo
+      const nuevoMasivo = await Masivos.create({
+        name: masivos.name,
+        amountsend: masivos.cant,
+        delaymin: masivos.delaymin,
+        delaymax: masivos.delaymax,
+        usuarioId: req.data.id,
+        amountinteres: 0
+      })
+
+      // Registrar relación con flows
+      if (masivos.flows && masivos.flows.length > 0) {
+        await nuevoMasivo.$set("flows", masivos.flows.map((flow: any) => flow.id));
+      }
+
+      for (const lead of leads) {
+        const queue = "bases";
+        const cantdelay =(Math.floor(Math.random() * (masivos.delaymax - masivos.delaymin + 1)) + masivos.delaymin) * 1000;
+
+        let randomIndex = Math.floor(Math.random() * masivos.flows.length);
+        let flowAleatorio = masivos.flows[randomIndex];
+
+        const message = { number: lead.number, delai: cantdelay, flow: flowAleatorio };
+        
+        // Enviar mensaje a la cola "bases"
+        await rabbitMQ.sendMessage(queue, JSON.stringify(message));
+        await Leads.update({
+          flowId:flowAleatorio.id,
+          status: true,
+          metodo: "MASIVO"
+        },{where:{
+          number: lead.number
+        }})
+        await MasivoLead.create({
+          masivoId: nuevoMasivo.id,
+          leadId: lead.id,
+          status: "ENVIADO"
+        });
+      }
+
+      // Actualizar el estado de todas las bases a 'true'
+      /*
+      if (numbers.length > 0) {
+        await Leads.update({ status: true }, { where: { number: numbers } });
+      }*/
+      res
+        .status(200)
+        .json({ message: "se registraron correctamente los queues" });
+  } catch (error) {
+    console.error("Error al procesar los masivos:", error);
+    res
+      .status(500)
+      .json({ error: "Ocurrió un error al procesar la solicitud" });
+    }
+  };
+
   SendMasivos = async (req: any, res: any) => {
     const { masivos } = req.body;
     try {
