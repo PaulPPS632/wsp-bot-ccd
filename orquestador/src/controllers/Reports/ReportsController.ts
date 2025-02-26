@@ -6,6 +6,7 @@ import { MasivoLead } from "../../models/MasivoLead";
 import { Masivos } from "../../models/Masivos"
 import { Bot } from "../../models/Bot";
 import { AsignacionLead } from "../../models/AsignacionLead";
+import { Usuarios } from "../../models/Usuarios";
 
 export class ReportsController {
 
@@ -77,6 +78,10 @@ export class ReportsController {
                 },{
                     model: Flows,
                     attributes: ["name"]
+                },
+                {
+                    model: Usuarios,
+                    attributes: ["name"]
                 }
             ],
             limit:20
@@ -90,7 +95,8 @@ export class ReportsController {
             botname: asignacion.bot ? asignacion.bot.name : 'BOT NO EXISTE',
             botphone: asignacion.bot ? asignacion.bot.phone : 'BOT NO EXISTE',
             flowname: asignacion.flow.name,
-            
+            currentflow: asignacion.currentflow,
+            usuario: asignacion.usuario.name
         }))
 
         return res.status(200).json({asignaciones: format});
