@@ -1,39 +1,10 @@
 import { Op } from "sequelize";
 import { Flows } from "../../models/Flows";
-import { s3, BUCKET_NAME } from "../../config/s3Config";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import fs from "fs";
 class FlowsController {
   create = async (req: any, res: any) => {
     try {
-      console.log(req)
-      if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-        return res.status(400).json({ message: "No se han recibido archivos" });
-      }
       const { flow } = req.body;
       
-      const uploadedFiles = await Promise.all(
-        (req.files as Express.Multer.File[]).map(async (file) => {
-            const filePath = file.path;
-            const fileType = file.mimetype.includes("image") ? "Pei prueba": "Pei prueba";
-            const fileStream = fs.createReadStream(filePath);
-            const uploadKey = `${fileType}/${file.originalname}`;
-
-            const uploadParams = {
-                Bucket: BUCKET_NAME,
-                Key: uploadKey,
-                Body: fileStream
-            };
-
-            //const uploaded = await s3.upload(uploadParams).promise();
-            const objeto = new PutObjectCommand(uploadParams);
-            await s3.send(objeto);
-            fs.unlinkSync(filePath); 
-            const fileUrl = `https://pub-9d2abfa175714e64aed33b90722a9fd5.r2.dev/${BUCKET_NAME}/${uploadKey}`;
-            return fileUrl;
-        })
-      );
-      console.log(uploadedFiles);
       await Flows.create({
         name: flow.name.trim(),
         mensajes: flow.mensajes,
