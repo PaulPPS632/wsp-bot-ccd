@@ -88,10 +88,10 @@ const main = async () => {
     phoneNumber,
   });
   const config = {
-    host: process.env.DB_HOST ?? '',
-    user: process.env.DB_USER ?? '',
-    database: process.env.DB_NAME ?? '',
-    password: process.env.DB_PASSWORD ?? '',
+    host: process.env.DB_HOST ?? 'localhost',
+    user: process.env.DB_USER ?? 'paul',
+    database: process.env.DB_NAME ?? 'db_bot',
+    password: process.env.DB_PASSWORD ?? 'paulp',
     port: parseInt(process.env.DB_PORT, 10) ?? 3000
   }
   console.log(config)

@@ -28,6 +28,7 @@ export class AsignacionesController {
         amountsend: numeros.length,
         botId: bot.id,
         flowId: flow.id,
+        currentflow: flow,
         usuarioId: req.data.id
       }) 
       
@@ -135,6 +136,7 @@ export class AsignacionesController {
         amountsend: numeros.length,
         botId: bot.id,
         flowId: flow.id,
+        currentflow: flow,
         delaymin: delaymin,
         delaymax: delaymax
       }) 
