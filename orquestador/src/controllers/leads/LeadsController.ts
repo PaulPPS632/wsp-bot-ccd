@@ -57,8 +57,6 @@ class LeadsController {
               }
             })
           }
-          
-          
         }
         const botResponse = await fetch(
           `http://localhost:${bot[0].port}/v1/messages`,
