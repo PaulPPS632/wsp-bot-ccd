@@ -21,7 +21,7 @@ class FlowsController {
     try {
       const { masivos } = req.query;
       let flows;
-      if(masivos){
+      if(masivos == 'true'){
         flows = await Flows.findAll({
           where:{
             cursos: {
@@ -59,7 +59,35 @@ class FlowsController {
   search = async (req: any, res: any) => {
     try {
       const { search } = req.body;
-
+      const { masivos } = req.query; 
+      console.log(typeof masivos)
+      let flows;
+      if(masivos == 'true'){
+        console.log('si masivo')
+        flows = await Flows.findAll({
+          where:{
+            cursos: {
+              [Op.and]:[
+                {[Op.ne]: ''},
+                {[Op.ne]: null}
+              ]
+            },
+            name: {
+              [Op.like]: `%${search.toLowerCase()}%`,
+            },
+          }
+        });
+      }else{
+        console.log('si asignacion')
+        flows = await Flows.findAll({
+          where: {
+            name: {
+              [Op.like]: `%${search.toLowerCase()}%`,
+            },
+          },
+        });//todos
+      }
+      /*
       const flows = await Flows.findAll({
         where: {
           name: {
@@ -67,7 +95,7 @@ class FlowsController {
           },
         },
       });
-
+*/
       return res.status(200).json({ flows: flows });
     } catch (error: any) {
       console.log("error en busqueda: ", error.message);
