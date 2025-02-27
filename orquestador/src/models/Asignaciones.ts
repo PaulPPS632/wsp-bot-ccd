@@ -49,4 +49,8 @@ export class Asignaciones extends Model{
     @AllowNull(true)
     @Column(DataType.INTEGER)
     usuarioId!: number
+
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    status!:string
 }

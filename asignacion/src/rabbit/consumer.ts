@@ -63,6 +63,11 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
                 }
                 
               }
+              await fetch(`http://${ruta_local_orquestador}:8000/api/asignaciones/changestatus`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ number, status: 'ENVIADO' }),
+              })
               channel.ack(msg);
             } catch (sendErr: any) {
               console.error("Error al enviar mensaje:", sendErr);

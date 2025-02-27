@@ -86,7 +86,7 @@ export class ReportsController {
             ],
             limit:20
         });
-
+        
         const format = asignaciones.map((asignacion) => ({
             id: asignacion.id,
             name: asignacion.name,
@@ -96,7 +96,8 @@ export class ReportsController {
             botphone: asignacion.bot ? asignacion.bot.phone : 'BOT NO EXISTE',
             flowname: asignacion.flow.name,
             currentflow: asignacion.currentflow,
-            usuario: asignacion.usuario.name
+            usuario: asignacion.usuario.name,
+            status: asignacion.status
         }))
 
         return res.status(200).json({asignaciones: format});

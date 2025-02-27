@@ -9,4 +9,5 @@ const asignacionesController = new AsignacionesController()
 AsignacionesRouter.post("", Authorization,asignacionesController.sendAsignaciones);
 AsignacionesRouter.post("/failmessage", asignacionesController.FailMessage);
 AsignacionesRouter.post("/programacion", asignacionesController.ProgramarAsignacion);
+AsignacionesRouter.post("/changestatus", asignacionesController.ChangeStatus);
 export default AsignacionesRouter;

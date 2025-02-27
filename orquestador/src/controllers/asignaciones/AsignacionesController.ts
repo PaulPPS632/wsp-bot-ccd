@@ -7,15 +7,19 @@ import { TaskQueueService } from "../../services/TaskQueueService";
 export class AsignacionesController {
   sendAsignaciones = async (req: any, res: any) => {
     try {
-      const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
+      const { name, numeros, flow, bot, delaymin, delaymax } =
+        req.body.asignaciones;
 
-      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
+      if (numeros.length == 0)
+        return res.status(400).json({
+          error: "no puedes enviar una asignacion sin numeros de destino",
+        });
       //const numbers = numeros.map((numero: any) => ({ number: numero }));
 
       for (const numero of numeros) {
         await Leads.findOrCreate({
           where: { number: numero },
-          defaults: { number: numero , status: true, metodo: "ASIGNACION"},
+          defaults: { number: numero, status: true, metodo: "ASIGNACION" },
         });
       }
 
@@ -29,9 +33,10 @@ export class AsignacionesController {
         botId: bot.id,
         flowId: flow.id,
         currentflow: flow,
-        usuarioId: req.data.id
-      }) 
-      
+        usuarioId: req.data.id,
+        status: 'PENDIENTE'
+      });
+
       const asigbulk = numeros
         .map((numero: any) => {
           const cliente = clientes.find((c) => c.number === numero);
@@ -39,7 +44,7 @@ export class AsignacionesController {
             ? {
                 asignacionId: newasignacion.id,
                 leadId: cliente.id,
-                status: "ENVIADO"
+                status: "PENDIENTE",
               }
             : null;
         })
@@ -50,7 +55,7 @@ export class AsignacionesController {
       const rabbitMQ = await RabbitMQService.getInstance();
       const exchange = "asesores";
       for (const numero of numeros) {
-        const routingKey = "51"+bot.phone.toString();
+        const routingKey = "51" + bot.phone.toString();
         const cantdelay =
           (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
           1000;
@@ -66,12 +71,10 @@ export class AsignacionesController {
         .json({ message: "se registraron correctamente la asignacion" });
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
-      return res
-        .status(500)
-        .json({
-          message: "error en envio de asignaciones",
-          error: error.menssage,
-        });
+      return res.status(500).json({
+        message: "error en envio de asignaciones",
+        error: error.menssage,
+      });
     }
   };
   FailMessage = async (req: any, res: any) => {
@@ -82,6 +85,7 @@ export class AsignacionesController {
           number,
         },
       });
+
       if (!lead)
         return res
           .status(404)
@@ -91,39 +95,39 @@ export class AsignacionesController {
         order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
       });
       if (!ultimaAsignacion) {
-        return res
-          .status(404)
-          .json({
-            message: "No se encontró ninguna asignación para este cliente",
-          });
+        return res.status(404).json({
+          message: "No se encontró ninguna asignación para este cliente",
+        });
       }
       await ultimaAsignacion.update({
-        status: "error al enviar el mensaje",
+        status: "ERROR",
         observacionstatus: error,
       });
 
       return res.status(200).json();
     } catch (error: any) {
       console.error("Error en FailMessage:", error.message);
-      return res
-        .status(500)
-        .json({
-          message: "Error al actualizar la asignación",
-          error: error.message,
-        });
+      return res.status(500).json({
+        message: "Error al actualizar la asignación",
+        error: error.message,
+      });
     }
   };
-  ProgramarAsignacion = async(req: any, res: any) => {
+  ProgramarAsignacion = async (req: any, res: any) => {
     try {
-      const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
+      const { name, numeros, flow, bot, delaymin, delaymax } =
+        req.body.asignaciones;
       const { programacion } = req.body;
       console.log("fecha de programacion", programacion);
-      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
-      
+      if (numeros.length == 0)
+        return res.status(400).json({
+          error: "no puedes enviar una asignacion sin numeros de destino",
+        });
+
       for (const numero of numeros) {
         await Leads.findOrCreate({
           where: { number: numero },
-          defaults: { number: numero , status: true, metodo: "ASIGNACION"},
+          defaults: { number: numero, status: true, metodo: "ASIGNACION" },
         });
       }
 
@@ -138,21 +142,21 @@ export class AsignacionesController {
         flowId: flow.id,
         currentflow: flow,
         delaymin: delaymin,
-        delaymax: delaymax
-      }) 
-      
+        delaymax: delaymax,
+      });
+
       const asigbulk = numeros
         .map((numero: any) => {
           const cliente = clientes.find((c) => c.number === numero);
           const cantdelay =
-          (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
-          1000;
+            (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
+            1000;
           return cliente
             ? {
                 asignacionId: newasignacion.id,
                 leadId: cliente.id,
                 status: "PENDIENTE",
-                delay: cantdelay
+                delay: cantdelay,
               }
             : null;
         })
@@ -161,19 +165,52 @@ export class AsignacionesController {
       await AsignacionLead.bulkCreate(asigbulk);
 
       const taskQueueService = new TaskQueueService();
-      const idjob = await taskQueueService.scheduleTask(programacion, newasignacion.id);
-      
+      const idjob = await taskQueueService.scheduleTask(
+        programacion,
+        newasignacion.id
+      );
+
       return res
         .status(200)
-        .json({ message: `Asignacion programada, jobId: ${idjob}`});
+        .json({ message: `Asignacion programada, jobId: ${idjob}` });
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
-      return res
-        .status(500)
-        .json({
-          message: "error en envio de asignaciones",
-          error: error.menssage,
-        });
+      return res.status(500).json({
+        message: "error en envio de asignaciones",
+        error: error.menssage,
+      });
     }
-  }
+  };
+  ChangeStatus = async (req: any, res: any) => {
+    try {
+      const { number, status } = req.body;
+      const lead = await Leads.findOne({
+        where: {
+          number,
+        },
+      });
+      if (!lead)
+        return res
+          .status(404)
+          .json({ message: "no se encontro el cliente de este numero" });
+      const ultimaAsignacion = await AsignacionLead.findOne({
+        where: { leadId: lead.id },
+        order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
+      });
+      if (!ultimaAsignacion) {
+        return res.status(404).json({
+          message: "No se encontró ninguna asignación para este cliente",
+        });
+      }
+      await ultimaAsignacion.update({
+        status,
+      });
+
+      return res.status(200).json();
+    } catch (error) {
+      return res.status(500).json({
+        message: "Error al actualizar la asignación",
+      });
+    }
+  };
 }
