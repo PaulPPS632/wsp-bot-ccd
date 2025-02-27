@@ -1,8 +1,13 @@
+import { Op } from "sequelize";
 import { AsignacionLead } from "../../models/AsignacionLead";
 import { Asignaciones } from "../../models/Asignaciones";
 import { Leads } from "../../models/Leads";
 import RabbitMQService from "../../services/RabbitMQService";
 import { TaskQueueService } from "../../services/TaskQueueService";
+import { Bot } from "../../models/Bot";
+import { Flows } from "../../models/Flows";
+import { Usuarios } from "../../models/Usuarios";
+
 
 export class AsignacionesController {
   sendAsignaciones = async (req: any, res: any) => {
@@ -68,7 +73,10 @@ export class AsignacionesController {
       }
       return res
         .status(200)
-        .json({ message: "se registraron correctamente la asignacion" });
+        .json({ message: "se registraron correctamente la asignacion" })
+      /* .redirect("/newasignacion"); */
+
+
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
       return res.status(500).json({
@@ -213,4 +221,59 @@ export class AsignacionesController {
       });
     }
   };
+  searchAsignacion = async (req: any, res: any) => {
+    const { search, page = 1, limit = 10 } = req.body;
+    const offset = (page - 1) * limit;
+
+    try {
+        const total = await Asignaciones.count({
+            where: {
+                name: {
+                    [Op.like]: `%${search}%`
+                }
+            }
+        });
+
+        const asignaciones = await Asignaciones.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${search}%`
+                }
+            },
+            include: [
+                { model: Bot, attributes: ["name", "phone"] },
+                { model: Flows, attributes: ["name"] },
+                { model: Usuarios, attributes: ["name"] }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit, 
+            offset
+        });
+
+        const format = asignaciones.map(asignacion => ({
+            id: asignacion.id,
+            name: asignacion.name,
+            createdAt: asignacion.createdAt,
+            amountsend: asignacion.amountsend,
+            botname: asignacion.bot?.name || "BOT NO EXISTE",
+            botphone: asignacion.bot?.phone || "SIN TELÉFONO",
+            flowname: asignacion.flow?.name || "SIN FLUJO",
+            currentflow: asignacion.currentflow,
+            usuario: asignacion.usuario?.name || "USUARIO NO EXISTE"
+        }));
+
+        return res.status(200).json({
+            asignaciones: format,
+            total,  // Total de registros
+            page,   // Página actual
+            pages: Math.ceil(total / limit)  // Total de páginas
+        });
+
+    } catch (error: any) {
+        return res.status(500).json({
+            message: 'Error interno al buscar',
+            error: error.message
+        });
+    }
+};
 }
