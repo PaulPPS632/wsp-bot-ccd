@@ -1,21 +1,32 @@
+import { Op } from "sequelize";
 import { AsignacionLead } from "../../models/AsignacionLead";
 import { Asignaciones } from "../../models/Asignaciones";
 import { Leads } from "../../models/Leads";
 import RabbitMQService from "../../services/RabbitMQService";
 import { TaskQueueService } from "../../services/TaskQueueService";
+import { Bot } from "../../models/Bot";
+import { Flows } from "../../models/Flows";
+import { Usuarios } from "../../models/Usuarios";
+
 
 export class AsignacionesController {
   sendAsignaciones = async (req: any, res: any) => {
     try {
       const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
 
-      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
+      if (!name || name.trim() === "") {
+        return res.status(400).json({ error: "El nombre de la asignación es obligatorio" });
+      }
+
+      //const numerosValidos = numeros.map((num: string) => num.trim()).filter((num: string) => num !== "");
+
+      if (numeros.length == 0) return res.status(400).json({ error: "no puedes enviar una asignacion sin numeros de destino" })
       //const numbers = numeros.map((numero: any) => ({ number: numero }));
 
       for (const numero of numeros) {
         await Leads.findOrCreate({
           where: { number: numero },
-          defaults: { number: numero , status: true, metodo: "ASIGNACION"},
+          defaults: { number: numero, status: true, metodo: "ASIGNACION" },
         });
       }
 
@@ -30,17 +41,17 @@ export class AsignacionesController {
         flowId: flow.id,
         currentflow: flow,
         usuarioId: req.data.id
-      }) 
-      
+      })
+
       const asigbulk = numeros
         .map((numero: any) => {
           const cliente = clientes.find((c) => c.number === numero);
           return cliente
             ? {
-                asignacionId: newasignacion.id,
-                leadId: cliente.id,
-                status: "ENVIADO"
-              }
+              asignacionId: newasignacion.id,
+              leadId: cliente.id,
+              status: "ENVIADO"
+            }
             : null;
         })
         .filter((item: any) => item !== null);
@@ -50,7 +61,7 @@ export class AsignacionesController {
       const rabbitMQ = await RabbitMQService.getInstance();
       const exchange = "asesores";
       for (const numero of numeros) {
-        const routingKey = "51"+bot.phone.toString();
+        const routingKey = "51" + bot.phone.toString();
         const cantdelay =
           (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
           1000;
@@ -63,7 +74,10 @@ export class AsignacionesController {
       }
       return res
         .status(200)
-        .json({ message: "se registraron correctamente la asignacion" });
+        .json({ message: "se registraron correctamente la asignacion" })
+      /* .redirect("/newasignacion"); */
+
+
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
       return res
@@ -113,17 +127,18 @@ export class AsignacionesController {
         });
     }
   };
-  ProgramarAsignacion = async(req: any, res: any) => {
+
+  ProgramarAsignacion = async (req: any, res: any) => {
     try {
       const { name, numeros, flow, bot, delaymin, delaymax } = req.body.asignaciones;
       const { programacion } = req.body;
       console.log("fecha de programacion", programacion);
-      if(numeros.length == 0) return res.status(400).json({error:"no puedes enviar una asignacion sin numeros de destino"})
-      
+      if (numeros.length == 0) return res.status(400).json({ error: "no puedes enviar una asignacion sin numeros de destino" })
+
       for (const numero of numeros) {
         await Leads.findOrCreate({
           where: { number: numero },
-          defaults: { number: numero , status: true, metodo: "ASIGNACION"},
+          defaults: { number: numero, status: true, metodo: "ASIGNACION" },
         });
       }
 
@@ -139,21 +154,21 @@ export class AsignacionesController {
         currentflow: flow,
         delaymin: delaymin,
         delaymax: delaymax
-      }) 
-      
+      })
+
       const asigbulk = numeros
         .map((numero: any) => {
           const cliente = clientes.find((c) => c.number === numero);
           const cantdelay =
-          (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
-          1000;
+            (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
+            1000;
           return cliente
             ? {
-                asignacionId: newasignacion.id,
-                leadId: cliente.id,
-                status: "PENDIENTE",
-                delay: cantdelay
-              }
+              asignacionId: newasignacion.id,
+              leadId: cliente.id,
+              status: "PENDIENTE",
+              delay: cantdelay
+            }
             : null;
         })
         .filter((item: any) => item !== null);
@@ -162,10 +177,10 @@ export class AsignacionesController {
 
       const taskQueueService = new TaskQueueService();
       const idjob = await taskQueueService.scheduleTask(programacion, newasignacion.id);
-      
+
       return res
         .status(200)
-        .json({ message: `Asignacion programada, jobId: ${idjob}`});
+        .json({ message: `Asignacion programada, jobId: ${idjob}` });
     } catch (error: any) {
       console.log("error en envio de asignaciones", error.message);
       return res
@@ -176,4 +191,94 @@ export class AsignacionesController {
         });
     }
   }
+
+  /* searchAsignacion = async (req: any, res: any) => {
+    const { search } = req.body;
+    try {
+      const asignaciones = await Asignaciones.findAll({
+        where: {
+          name: {
+            [Op.like]: `%${search}%`
+          }
+        },
+        include: [
+          { model: Bot, attributes: ["name", "phone"] },
+          { model: Flows, attributes: ["name"] },
+          { model: Usuarios, attributes: ["name"] }
+        ],
+      })
+      const format = asignaciones.map(asignacion => ({
+        id: asignacion.id,
+        name: asignacion.name,
+        createdAt: asignacion.createdAt,
+        amountsend: asignacion.amountsend,
+        botname: asignacion.bot?.name || "BOT NO EXISTE",
+        botphone: asignacion.bot?.phone || "SIN TELÉFONO",
+        flowname: asignacion.flow?.name || "SIN FLUJO",
+        currentflow: asignacion.currentflow,
+        usuario: asignacion.usuario?.name || "USUARIO NO EXISTE"
+    }));
+      return res.status(200).json({ asignaciones: format })
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error interno al buscar',
+        error: error.message
+      })
+    }
+  } */
+    searchAsignacion = async (req: any, res: any) => {
+      const { search, page = 1, limit = 10 } = req.body;
+      const offset = (page - 1) * limit;
+  
+      try {
+          const total = await Asignaciones.count({
+              where: {
+                  name: {
+                      [Op.like]: `%${search}%`
+                  }
+              }
+          });
+  
+          const asignaciones = await Asignaciones.findAll({
+              where: {
+                  name: {
+                      [Op.like]: `%${search}%`
+                  }
+              },
+              include: [
+                  { model: Bot, attributes: ["name", "phone"] },
+                  { model: Flows, attributes: ["name"] },
+                  { model: Usuarios, attributes: ["name"] }
+              ],
+              order: [['createdAt', 'DESC']],
+              limit, 
+              offset
+          });
+  
+          const format = asignaciones.map(asignacion => ({
+              id: asignacion.id,
+              name: asignacion.name,
+              createdAt: asignacion.createdAt,
+              amountsend: asignacion.amountsend,
+              botname: asignacion.bot?.name || "BOT NO EXISTE",
+              botphone: asignacion.bot?.phone || "SIN TELÉFONO",
+              flowname: asignacion.flow?.name || "SIN FLUJO",
+              currentflow: asignacion.currentflow,
+              usuario: asignacion.usuario?.name || "USUARIO NO EXISTE"
+          }));
+  
+          return res.status(200).json({
+              asignaciones: format,
+              total,  // Total de registros
+              page,   // Página actual
+              pages: Math.ceil(total / limit)  // Total de páginas
+          });
+  
+      } catch (error: any) {
+          return res.status(500).json({
+              message: 'Error interno al buscar',
+              error: error.message
+          });
+      }
+  };
 }
