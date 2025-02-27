@@ -223,7 +223,8 @@ export class ReportsController {
                 botphone: asignacion.bot?.phone || "SIN TELÉFONO",
                 flowname: asignacion.flow?.name || "SIN FLUJO",
                 currentflow: asignacion.currentflow,
-                usuario: asignacion.usuario?.name || "USUARIO NO EXISTE"
+                usuario: asignacion.usuario?.name || "USUARIO NO EXISTE",
+                status: asignacion.status
             }));
     
             return res.status(200).json({ asignaciones: format });
@@ -270,7 +271,7 @@ export class ReportsController {
     
                 const formattedAsignacion = masivosLead.map(masivolead => ({
                     fechaenvio: masivolead.createdAt,
-                    leadName: masivolead.lead?.name || "CLIENTE NO EXISTE",
+                    leadName: masivolead.lead?.name || "NOMBRE CLIENTE NO EXISTE",
                     leadPhone: masivolead.lead?.number || "SIN TELÉFONO",
                     status: masivolead.status,
                     observaciones: masivolead.observacionstatus
