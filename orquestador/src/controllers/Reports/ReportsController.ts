@@ -89,36 +89,7 @@ export class ReportsController {
             order: [["createdAt", "DESC"]],
             
         });
-<<<<<<< HEAD
         
-=======
-
-    BuscarAsignaciones = async (req: any, res: any) => {
-        try {
-            const { name } = req.query; 
-        
-            const asignaciones = await Asignaciones.findAll({
-                where: {
-                    name: {
-                        [Op.like]: `%${name}%`,
-                    },
-                },
-                include: [
-                    { model: Bot, attributes: ["name", "phone"] },
-                    { model: Flows, attributes: ["name"] },
-                    { model: Usuarios, attributes: ["name"] }
-                ],
-                order: [["createdAt", "DESC"]],
-            });
-        
-                res.json(asignaciones);
-            } catch (error) {
-                res.status(500).json({ error: "Error al buscar asignaciones" });
-            }
-        };
-    
-
->>>>>>> 1c8a5eeb9e6b0af9f527a3e224406b370935be36
         const format = asignaciones.map((asignacion) => ({
             id: asignacion.id,
             name: asignacion.name,
