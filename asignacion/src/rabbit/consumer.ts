@@ -16,7 +16,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
   
         try {
           const content = msg.content.toString();
-          const { number, delai, flow } = JSON.parse(content);
+          const { number, delai, flow, asignacion } = JSON.parse(content);
           console.log(`Esperando ${delai}ms para enviar mensaje a: ${number}`);
           await utils.delay(delai);
   
@@ -66,7 +66,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
               await fetch(`http://${ruta_local_orquestador}:8000/api/asignaciones/changestatus`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ number, status: 'ENVIADO' }),
+                body: JSON.stringify({ asignacion ,number, status: 'ENVIADO' }),
               })
               channel.ack(msg);
             } catch (sendErr: any) {
@@ -74,7 +74,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
               await fetch(`http://${ruta_local_orquestador}:8000/api/asignaciones/failmessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ number, error: sendErr.message }),
+                body: JSON.stringify({ asignacion, number, error: sendErr.message }),
               }).catch((error) => console.error("Error al actualizar estado:", error));
               channel.nack(msg, true, false);
             }
@@ -83,7 +83,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
             await fetch(`http://${ruta_local_orquestador}:8000/api/asignaciones/failmessage`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ number, error: 'Número no está en WhatsApp' }),
+              body: JSON.stringify({ asignacion, number, error: 'Número no está en WhatsApp' }),
             }).catch((error) => console.error("Error al actualizar estado:", error));
             channel.nack(msg, true, false);
           }

@@ -12,7 +12,7 @@ import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
-const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';
+const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';//"host.docker.internal";
 
 const main = async () => {
   const adapterFlow = createFlow([]);

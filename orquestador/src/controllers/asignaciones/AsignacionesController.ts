@@ -64,7 +64,7 @@ export class AsignacionesController {
         const cantdelay =
           (Math.floor(Math.random() * (delaymax - delaymin + 1)) + delaymin) *
           1000;
-        const message = { number: numero, delai: cantdelay, flow };
+        const message = { number: numero, delai: cantdelay, flow, asignacion: newasignacion.id  };
         await rabbitMQ.sendMessageToExchange(
           exchange,
           routingKey,
@@ -87,7 +87,7 @@ export class AsignacionesController {
   };
   FailMessage = async (req: any, res: any) => {
     try {
-      const { number, error } = req.body;
+      const { number, error, asignacion } = req.body;
       const lead = await Leads.findOne({
         where: {
           number,
@@ -98,9 +98,10 @@ export class AsignacionesController {
         return res
           .status(404)
           .json({ message: "no se encontro el cliente de este numero" });
-      const ultimaAsignacion = await AsignacionLead.findOne({
-        where: { leadId: lead.id },
-        order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
+        const ultimaAsignacion = await AsignacionLead.findOne({
+          where: { leadId: lead.id,
+          asignacionId: asignacion
+         },
       });
       if (!ultimaAsignacion) {
         return res.status(404).json({
@@ -191,7 +192,7 @@ export class AsignacionesController {
   };
   ChangeStatus = async (req: any, res: any) => {
     try {
-      const { number, status } = req.body;
+      const { number, status, asignacion } = req.body;
       const lead = await Leads.findOne({
         where: {
           number,
@@ -202,9 +203,12 @@ export class AsignacionesController {
           .status(404)
           .json({ message: "no se encontro el cliente de este numero" });
       const ultimaAsignacion = await AsignacionLead.findOne({
-        where: { leadId: lead.id },
-        order: [["createdAt", "DESC"]], // Ordena por id en orden descendente (el más reciente primero)
+        where: { 
+          leadId: lead.id,
+          asignacionId: asignacion
+         }
       });
+
       if (!ultimaAsignacion) {
         return res.status(404).json({
           message: "No se encontró ninguna asignación para este cliente",
@@ -213,7 +217,6 @@ export class AsignacionesController {
       await ultimaAsignacion.update({
         status,
       });
-
       return res.status(200).json();
     } catch (error) {
       return res.status(500).json({
@@ -259,8 +262,10 @@ export class AsignacionesController {
             botphone: asignacion.bot?.phone || "SIN TELÉFONO",
             flowname: asignacion.flow?.name || "SIN FLUJO",
             currentflow: asignacion.currentflow,
-            usuario: asignacion.usuario?.name || "USUARIO NO EXISTE"
+            usuario: asignacion.usuario?.name || "USUARIO NO EXISTE",
+            status: asignacion.status
         }));
+
 
         return res.status(200).json({
             asignaciones: format,

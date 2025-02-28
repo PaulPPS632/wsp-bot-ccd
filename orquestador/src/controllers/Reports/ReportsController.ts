@@ -270,7 +270,7 @@ export class ReportsController {
                 });
     
                 const formattedAsignacion = masivosLead.map(masivolead => ({
-                    fechaenvio: masivolead.createdAt,
+                    fechaenvio: masivolead.updatedAt,
                     leadName: masivolead.lead?.name || "NOMBRE CLIENTE NO EXISTE",
                     leadPhone: masivolead.lead?.number || "SIN TELÉFONO",
                     status: masivolead.status,

@@ -36,7 +36,9 @@ class Database {
           dialect,
           port,
           retry: { max: 3 },
-          models
+          models,
+          timezone: '-05:00',
+          //logging: false,
         }
       );
     } catch (error) {

@@ -292,7 +292,6 @@ class BotController {
           
           try {
             const containerInfo = await container.inspect();
-            console.log('consultando a bot', bot.phone);
             return {
               ...bot.toJSON(),
               status: containerInfo.State.Running, // `true` si está en ejecución
