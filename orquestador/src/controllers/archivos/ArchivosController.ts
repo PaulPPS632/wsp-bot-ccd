@@ -2,11 +2,10 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3, BUCKET_NAME } from "../../config/s3Config";
 export class ArchivosController{
     upload = async (req: any, res: any) => {
-        console.log(res)
         try{
             const file = req.file;
             const fileBuffer = file.buffer;
-                    const fileType = file.mimetype.includes("image") ? "Pei prueba": "Pei prueba";
+                    const fileType = file.mimetype.includes("image") ? "Masivos/Imagenes": file.mimetype.includes("video") ? "Masivos/Videos" : "Masivos/Documentos";
 
                     const uploadKey = `${fileType}/${file.originalname}`;
         
