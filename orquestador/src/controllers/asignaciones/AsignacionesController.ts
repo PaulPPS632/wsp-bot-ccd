@@ -152,6 +152,7 @@ export class AsignacionesController {
         currentflow: flow,
         delaymin: delaymin,
         delaymax: delaymax,
+        status: 'PENDIENTE'
       });
 
       const asigbulk = numeros

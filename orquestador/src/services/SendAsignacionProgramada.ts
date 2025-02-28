@@ -35,7 +35,7 @@ export const sendAsignacionProgramada = async (data: any) => {
 
     const promises = mensajes.map(async (mensaje) => {
         const routingKey = "51" + mensaje.asignacion.bot.phone;
-        const message = { number: mensaje.lead.number, delay: mensaje.delay, flow: mensaje.asignacion.flow };
+        const message = { number: mensaje.lead.number, delay: mensaje.delay, flow: mensaje.asignacion.flow, asignacion: mensaje.asignacion.id };
         console.log(JSON.stringify(message));
         return rabbitMQ.sendMessageToExchange(exchange, routingKey, JSON.stringify(message));
       });
