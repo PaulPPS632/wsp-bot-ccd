@@ -148,6 +148,7 @@ export class ReportsController {
     import { Bot } from "../../models/Bot";
     import { AsignacionLead } from "../../models/AsignacionLead";
     import { Usuarios } from "../../models/Usuarios";
+import { Sequelize } from "sequelize-typescript";
     
     export class ReportsController {
         
@@ -283,4 +284,172 @@ export class ReportsController {
                 return res.status(500).json({ message: "Error interno del servidor", error: error.message });
             }
         }
+
+        cantMensajesEnviadosDelDia = async (_req: any, res: any) => {
+
+            const inicioDelDia = new Date();
+            inicioDelDia.setHours(0, 0, 0, 0);
+
+            const finDelDia = new Date();
+            finDelDia.setHours(23, 59, 59, 999);
+
+            const cantMensajesAsignacion = await AsignacionLead.count({
+                where: { 
+                    status: { [Op.like]: "ENVIADO" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const cantMensajesMasivos = await MasivoLead.count({
+                where: { 
+                    status: { [Op.like]: "ENVIADO" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const totalCantidad = cantMensajesAsignacion + cantMensajesMasivos;
+
+            return res.status(200).json({ mensajesAsignacion: cantMensajesAsignacion, mensajesMasivos: cantMensajesMasivos, total: totalCantidad });
+        }
+
+        cantMensajesPendientesDelDia = async (_req: any, res: any) => {
+
+            const inicioDelDia = new Date();
+            inicioDelDia.setHours(0, 0, 0, 0);
+
+            const finDelDia = new Date();
+            finDelDia.setHours(23, 59, 59, 999);
+
+            const cantMensajesAsignacion = await AsignacionLead.count({
+                where: { 
+                    status: { [Op.like]: "PENDIENTE" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const cantMensajesMasivos = await MasivoLead.count({
+                where: { 
+                    status: { [Op.like]: "PENDIENTE" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const totalCantidad = cantMensajesAsignacion + cantMensajesMasivos;
+
+            return res.status(200).json({ mensajesAsignacion: cantMensajesAsignacion, mensajesMasivos: cantMensajesMasivos, total: totalCantidad });
+        }
+
+        cantMensajesErrorDelDia = async (_req: any, res: any) => {
+
+            const inicioDelDia = new Date();
+            inicioDelDia.setHours(0, 0, 0, 0);
+
+            const finDelDia = new Date();
+            finDelDia.setHours(23, 59, 59, 999);
+
+            const cantMensajesAsignacion = await AsignacionLead.count({
+                where: { 
+                    status: { [Op.like]: "ERROR" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const cantMensajesMasivos = await MasivoLead.count({
+                where: { 
+                    status: { [Op.like]: "ERROR" },
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const totalCantidad = cantMensajesAsignacion + cantMensajesMasivos;
+
+            return res.status(200).json({ mensajesAsignacion: cantMensajesAsignacion, mensajesMasivos: cantMensajesMasivos, total: totalCantidad });
+        }
+
+        cantMensajesDelDia = async (_req: any, res: any) => {
+            const inicioDelDia = new Date();
+            inicioDelDia.setHours(0, 0, 0, 0);
+
+            const finDelDia = new Date();
+            finDelDia.setHours(23, 59, 59, 999);
+
+            const cantMensajesAsignacion = await AsignacionLead.count({
+                where: { 
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const cantMensajesMasivos = await MasivoLead.count({
+                where: { 
+                    createdAt: {
+                        [Op.between]: [inicioDelDia, finDelDia]
+                    } }
+            })
+
+            const totalCantidad = cantMensajesAsignacion + cantMensajesMasivos;
+
+            return res.status(200).json({ mensajesAsignacion: cantMensajesAsignacion, mensajesMasivos: cantMensajesMasivos, total: totalCantidad });
+        }
+
+        AsignacionesxUsuario = async (_req: any, res: any) => {
+            try {
+              // Obtener asignaciones agrupadas por fecha y usuario
+              const asignaciones = await Asignaciones.findAll({
+                include: [
+                  {
+                    model: Usuarios,
+                    as: "usuario", // Asegúrate de que este alias coincida con el definido en el modelo
+                    attributes: ["name"],
+                  },
+                ],
+                attributes: [
+                  [Sequelize.fn("DATE", Sequelize.col("Asignaciones.createdAt")), "fecha"], // Extraer solo la fecha
+                  [Sequelize.fn("SUM", Sequelize.col("amountsend")), "totalEnviado"],
+                ],
+                group: ["fecha", "usuario.id"],
+                order: [["fecha", "ASC"]],
+              });
+          
+              // Formatear datos para el gráfico
+              const series: any = [];
+              const fechas: any = [];
+          
+              asignaciones.forEach((asignacion) => {
+                const fecha = asignacion.getDataValue("fecha");
+                const usuario = asignacion.getDataValue("usuario");
+                const totalEnviado = asignacion.getDataValue("totalEnviado");
+          
+                if (!fecha || !usuario) return; // Evitar errores en datos faltantes
+          
+                // Agregar fechas únicas para el eje X
+                if (!fechas.includes(fecha)) {
+                  fechas.push(fecha);
+                }
+          
+                // Buscar si ya existe una serie para este usuario
+                let usuarioData = series.find((serie: { name: any; }) => serie.name === usuario.name);
+          
+                if (!usuarioData) {
+                  usuarioData = { name: usuario.name, data: [] };
+                  series.push(usuarioData);
+                }
+          
+                // Agregar los datos correspondientes al usuario
+                usuarioData.data.push(totalEnviado);
+              });
+          
+              res.json({ series, fechas });
+            } catch (error) {
+              console.error("Error obteniendo las asignaciones:", error);
+              res.status(500).json({ message: "Error obteniendo las asignaciones" });
+            }
+          };
+
     }
