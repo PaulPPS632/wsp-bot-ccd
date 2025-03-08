@@ -285,7 +285,7 @@ import { Sequelize } from "sequelize-typescript";
             }
         }
 
-        cantMensajes3 = async (req: any, res: any) => {
+        cantMensajes = async (req: any, res: any) => {
             try {
                 // Obtener la fecha dinámica desde los parámetros de la solicitud
                 const { date } = req.body; // O req.body si prefieres enviarlo en el body
@@ -317,12 +317,24 @@ import { Sequelize } from "sequelize-typescript";
                 console.log(startOfDay, endOfDay);
                 console.log("=========================================");
                 // Consulta para obtener los registros del día seleccionado
-                const results = await MasivoLead.findAll({
+                const masivos = await MasivoLead.findAll({
                   where: {
                     createdAt: {
                       [Op.between]: [startOfDay, endOfDay],
                     },
                   },
+                });
+
+                const asignaciones = await Asignaciones.findAll({
+                    attributes:[
+                        [Sequelize.fn("SUM", Sequelize.col("amountsend")), "totalEnviado"],
+                    ],
+                    where: {
+                        createdAt: {
+                          [Op.between]: [startOfDay, endOfDay],
+                          
+                        },
+                    },
                 });
             
                 // Contadores para los diferentes estados
@@ -331,27 +343,41 @@ import { Sequelize } from "sequelize-typescript";
                 let noInteresados = 0;
             
                 // Recorrer los resultados y contar los estados
-                results.forEach((record) => {
+                masivos.forEach((masivo) => {
                   totalMessages++;
-                  if (record.status === 'interesado') {
+                  if (masivo.status === 'interesado') {
                     interesados++;
-                  } else if (record.status === 'no interesado') {
+                  } else if (masivo.status === 'no interesado') {
                     noInteresados++;
+                  }
+                });
+
+                let conteoTotal = asignaciones[0].getDataValue("totalEnviado");
+                let totalEnviado = 0;
+                let totalPendiente = 0;
+                let totalError = 0;
+            
+                // Recorrer los resultados y contar los estados
+                asignaciones.forEach((asignacion) => {
+                  if (asignacion.status === 'ENVIADO') {
+                    totalEnviado++;
+                  } else if (asignacion.status === 'PENDIENTE') {
+                    totalPendiente++;
+                  } else if (asignacion.status === 'ERROR') {
+                    totalError++;
                   }
                 });
             
                 // Enviar la respuesta con las estadísticas
-                res.status(200).json({
-                  totalMessages,
-                  interesados,
-                  noInteresados,
-                });
+                res.status(200).json({Masivos: {Total:totalMessages, Interesados:interesados, NoInteresados:noInteresados}, Asignaciones: {Total: conteoTotal,Enviado:totalEnviado, Pendientes:totalPendiente, Errores:totalError}});
+
               } catch (error) {
                 console.error('Error al obtener las estadísticas:', error);
                 res.status(500).json({ message: 'Error interno del servidor' });
               }
           };
 
+        
         AsignacionesxUsuario = async (_req:any, res:any) => {
             try {
                 const asignaciones = await Asignaciones.findAll({
@@ -394,12 +420,40 @@ import { Sequelize } from "sequelize-typescript";
             }
         };
 
+        AsignacionesxUsuario2 = async (_req:any, res:any) => {
+            try {
+                const asignaciones = await Asignaciones.findAll({
+                    include: [{
+                        model: Usuarios,
+                        as: "usuario",
+                        attributes: ["name"],
+                    }],
+                    attributes: [
+                        [Sequelize.fn("SUM", Sequelize.col("amountsend")), "totalEnviado"]
+                    ],
+                    group: ["usuario.id", "usuario.name"],
+                    order: [[Sequelize.fn("SUM", Sequelize.col("amountsend")), "DESC"]],
+                });
+        
+                const result = asignaciones.map((asignacion) => ({
+                    name: asignacion.getDataValue("usuario").name,
+                    value: asignacion.getDataValue("totalEnviado"),
+                }));
+        
+                res.json(result);
+            } catch (error) {
+                console.error("Error obteniendo las asignaciones:", error);
+                res.status(500).json({ message: "Error obteniendo las asignaciones" });
+            }
+        };
+
         cantMasivosPorDia = async (_req:any, res:any) => {
             try {
-                const masivos = await Masivos.findAll({
+                const masivos = await MasivoLead.findAll({
                     attributes: [
-                        [Sequelize.fn("DATE", Sequelize.col("Masivos.createdAt")), "fecha"],
-                        [Sequelize.fn("SUM", Sequelize.col("amountsend")), "totalEnviado"],
+                        [Sequelize.fn("DATE", Sequelize.col("MasivoLead.createdAt")), "fecha"],
+                        [Sequelize.fn("COUNT", Sequelize.col("MasivoLead.id")), "totalEnviado"]
+
                     ],
                     group: ["fecha"],
                     order: [["fecha", "ASC"]],
@@ -424,6 +478,7 @@ import { Sequelize } from "sequelize-typescript";
                     });
                 });
                 
+                //res.json(masivos);
                 res.json(Object.values(result));
             } catch (error) {
                 console.error("Error obteniendo las asignaciones:", error);

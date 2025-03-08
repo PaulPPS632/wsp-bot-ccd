@@ -9,9 +9,9 @@ ReportsRouter.get("/masivos", reportsController.ReporteMasivos);
 ReportsRouter.get("/leadsinteresados/:id", reportsController.LeadsInteresados);
 ReportsRouter.get("/leadsasignaciones/:id", reportsController.LeadsAsignacion);
 
-ReportsRouter.post("/cantmensajes", reportsController.cantMensajes3);
+ReportsRouter.post("/cantmensajes", reportsController.cantMensajes);
 ReportsRouter.get("/masivosxdia", reportsController.cantMasivosPorDia);
-ReportsRouter.get("/asignacionesxusuario", reportsController.AsignacionesxUsuario);
+ReportsRouter.get("/asignacionesxusuario", reportsController.AsignacionesxUsuario2);
 ReportsRouter.get("/cantinteresados", reportsController.cantInteresadosPorDiav2);
 
 export default ReportsRouter;
