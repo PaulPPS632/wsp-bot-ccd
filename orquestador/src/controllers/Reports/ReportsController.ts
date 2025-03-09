@@ -420,9 +420,34 @@ import { Sequelize } from "sequelize-typescript";
             }
         };
 
-        AsignacionesxUsuario2 = async (_req:any, res:any) => {
+        AsignacionesxUsuario2 = async (req:any, res:any) => {
             try {
+                const { date } = req.body; // O req.body si prefieres enviarlo en el body
+            
+                if (!date) {
+                  return res.status(400).json({ message: 'La fecha es requerida' });
+                }
+            
+                // Convertir la fecha a un objeto Date
+                const selectedDate = new Date(date as string);
+            
+                // Verificar si la fecha es válida
+                if (isNaN(selectedDate.getTime())) {
+                  return res.status(400).json({ message: 'Fecha no válida' });
+                }
+            
+                // Ajustar la fecha para trabajar en la zona horaria configurada (-05:00)
+                const startOfDay = new Date(selectedDate);
+                startOfDay.setHours(0, 0, 0, 0);
+            
+                const endOfDay = new Date(selectedDate);
+                endOfDay.setHours(23, 59, 59, 999);
                 const asignaciones = await Asignaciones.findAll({
+                    where: {        
+                        createdAt: {
+                        [Op.between]: [startOfDay, endOfDay],
+                        },
+                    },
                     include: [{
                         model: Usuarios,
                         as: "usuario",
