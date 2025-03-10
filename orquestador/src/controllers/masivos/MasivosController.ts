@@ -46,7 +46,12 @@ class MasivosController {
         let randomIndex = Math.floor(Math.random() * masivos.flows.length);
         let flowAleatorio = masivos.flows[randomIndex];
 
-        const message = { number: lead.number, delai: cantdelay, flow: flowAleatorio };
+        const message = { number: lead.number, delai: cantdelay, 
+          flow: {
+            id: flowAleatorio.id,
+            name: flowAleatorio.name,
+            mensajes: flowAleatorio.mensajes
+          } };
         
         // Enviar mensaje a la cola "bases"
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
@@ -121,7 +126,12 @@ class MasivosController {
         let randomIndex = Math.floor(Math.random() * masivos.flows.length);
         let flowAleatorio = masivos.flows[randomIndex];
 
-        const message = { number: lead.number, delai: cantdelay, flow: flowAleatorio };
+        const message = { number: lead.number, delai: cantdelay, 
+          flow: {
+          id: flowAleatorio.id,
+          name: flowAleatorio.name,
+          mensajes: flowAleatorio.mensajes
+        } };
         
         // Enviar mensaje a la cola "bases"
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
