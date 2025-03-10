@@ -127,18 +127,6 @@ const main = async () => {
                     await adapterProvider.sendFile(number+ "@s.whatsapp.net", mensaje.content.body, mensaje.content.footer);
                     break;
                 }
-                await bot.provider.sendMessage(
-                  number, [
-                    "Solicita ahora la lista de cursos disponibles y elige la opción que más te interese:",
-                    "",
-                    "1️⃣ Curso de Ingeniería ⚙",
-                    "2️⃣ Curso de Gestión Pública 🏛",
-                    "3️⃣ Curso de Minería ⛏",
-                    "",
-                    "¡Contáctanos y aprovecha esta promoción por tiempo limitado! 🚀💼"
-                  ].join("\n"),
-                  {}
-                );
                 await utils.delay(300);
               } catch (error: any) {
                 console.error(`❌ Error al enviar el mensaje de tipo '${mensaje.tipo}':`, error);
