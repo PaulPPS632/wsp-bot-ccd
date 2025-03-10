@@ -37,7 +37,6 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
       }else{
-        await flowDynamic(`Porfavor ingresa un numero de la lista de cursos`)
         return fallBack();
       }
     } else {
