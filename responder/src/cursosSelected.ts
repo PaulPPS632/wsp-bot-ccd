@@ -33,6 +33,7 @@ export const consultar = async (phone: string):Promise<{ flag: boolean, cursos: 
 
 export const consultayselectedCurso = async (phone: string, option: number):Promise<{ flag: boolean, curso: string }> => {
     const{flag,cursos} = await consultar(phone);
+    console.log("resultado de consulta backend:",{flag, cursos})
     if(flag){
         return {flag: false,curso:''};
     }else{

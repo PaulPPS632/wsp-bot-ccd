@@ -28,11 +28,12 @@ const flujo = addKeyword<Provider, Database>(utils.setEvent('FLUJO'))
   .addAnswer([
     '👉Por favor, digite número del curso de su interés (ejm  23).'
   ].join("\n"), {capture: true},
-  async (ctx, { fallBack, gotoFlow,flowDynamic, blacklist }) => {
+  async (ctx, { fallBack, gotoFlow, flowDynamic, blacklist }) => {
     const body = ctx.body.trim().toLocaleLowerCase();
     const option = parseInt(body, 10);
     if (!isNaN(option)) {
       const {flag, curso} = await consultayselectedCurso(ctx.from, option);
+      console.log(curso);
       if(flag){
         await flowDynamic(`Tu curso seleccionado es: *${curso}*`)
         return gotoFlow(mensajefinal);
