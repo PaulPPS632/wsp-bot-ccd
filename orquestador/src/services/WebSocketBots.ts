@@ -27,57 +27,92 @@ export class WebSocketBots {
     }, this.checkIntervalMs);
   }
   private async checkBotsStatus(): Promise<void> {
-    const statuses: Array<{ containerId: string; phone: string; status: string; newPairingCode?: string }> = [];
-  try {
-    const bots = await Bot.findAll();
-    if(bots){
-      for (const bot of bots) {
-        try {
-          const response = await fetch(`http://localhost:${bot.port}/v1/codigo`);
-          const data = await response.json();
-          console.log("datos: ", {
-            pairingCode: data.pairingCode,
-            status: data.status
-          })
-          if (data.pairingCode !== bot.pairingCode || !data.status) {
-            statuses.push({
-              containerId: bot.containerId,
-              phone: bot.phone,
-              status: "desvinculado",
-              newPairingCode: data.pairingCode,
-            });
-            console.log(`Emitiendo mensaje de desvinculación para el bot ${bot.containerId}`);
-            await Bot.update(
-              { pairingCode: data.pairingCode },
-              { where: { id: bot.id } }
-            );
-          } else {
-            statuses.push({ containerId: bot.containerId,phone: bot.phone, status: "activo" });
-            await Bot.update(
-              { status: true },
-              { where: { id: bot.id } }
-            );
-          }
-        } catch (error) {
-          if(bot.status){
-            statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "inactivo" });
-            await Bot.update(
-              { status: false },
-              { where: { id: bot.id } }
-            );
-          }
-          
-          console.log(`El bot con containerId ${bot.containerId} en el puerto ${bot.port} está caído`);
-        }
-      } 
-      // Una vez evaluados todos los bots, se emite un único evento con el array de estados.
-      this.io.emit("bots-status", statuses);
+    try {
+        const bots = await Bot.findAll();
+        if (!bots || bots.length === 0) return;
+
+        const statuses: Array<{ containerId: string; phone: string; status: string; newPairingCode?: string }> = [];
+
+        await Promise.all(bots.map(async (bot) => {
+            try {
+                const data = await this.fetchWithTimeout(`http://localhost:${bot.port}/v1/codigo`, 5000); // 5 segundos de timeout
+                
+                //console.log("Datos recibidos:", { pairingCode: data.pairingCode, status: data.status });
+
+                if (data.pairingCode !== bot.pairingCode || !data.status) {
+                    statuses.push({
+                        containerId: bot.containerId,
+                        phone: bot.phone,
+                        status: "desvinculado",
+                        newPairingCode: data.pairingCode,
+                    });
+
+                    //console.log(`Bot ${bot.containerId} desvinculado`);
+
+                    if (bot.pairingCode !== data.pairingCode) {
+                        await Bot.update({ pairingCode: data.pairingCode }, { where: { id: bot.id } });
+                    }
+                } else {
+                    statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "activo" });
+
+                    if (!bot.status) {
+                        await Bot.update({ status: true }, { where: { id: bot.id } });
+                    }
+                }
+            } catch (error) {
+                //console.log(`Error al consultar bot ${bot.containerId}, reintentando...`);
+                
+                // Intentamos una segunda vez antes de marcarlo como inactivo
+                try {
+                    await this.fetchWithTimeout(`http://localhost:${bot.port}/v1/codigo`, 5000);
+                    
+                    //console.log(`Segunda verificación exitosa para bot ${bot.containerId}:`, data);
+                    statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "activo" });
+
+                    if (!bot.status) {
+                        await Bot.update({ status: true }, { where: { id: bot.id } });
+                    }
+                } catch (retryError) {
+                    if (bot.status) {
+                        statuses.push({ containerId: bot.containerId, phone: bot.phone, status: "inactivo" });
+                        await Bot.update({ status: false }, { where: { id: bot.id } });
+                    }
+                    console.log(`Bot ${bot.containerId} en puerto ${bot.port} está caído tras segundo intento.`);
+                }
+            }
+        }));
+
+        this.io.emit("bots-status", statuses);
+    } catch (error) {
+        console.error("Error al consultar el estado de los bots:", error);
     }
-  } catch (error) {
-    console.error("Error al consultar el estado de los bots:", error);
-  }
-  //return statuses;
-  }
+}
+
+/**
+ * Función para hacer fetch con timeout
+ */
+private async fetchWithTimeout(url: string, timeout: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+            controller.abort();
+            reject(new Error("Timeout al obtener datos del bot"));
+        }, timeout);
+
+        fetch(url, { signal: controller.signal })
+            .then(response => response.json())
+            .then(data => {
+                clearTimeout(timeoutId);
+                resolve(data);
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                reject(error);
+            });
+    });
+}
+
+
   public stopCheck(): void {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);

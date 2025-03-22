@@ -4,8 +4,9 @@ import { GoogleSpreadsheet } from "google-spreadsheet";
 export class GoogleSheet {
   private static instance: GoogleSheet;
   private doc!: GoogleSpreadsheet;
+  private sheetId!: number;
 
-  private constructor(email: string, private_key: string) {
+  private constructor(email: string, private_key: string, SPREADSHEET_ID: string, sheetId: number) {
     const SCOPES = [
       "https://www.googleapis.com/auth/spreadsheets",
       "https://www.googleapis.com/auth/drive.file",
@@ -17,20 +18,23 @@ export class GoogleSheet {
       scopes: SCOPES,
     });
 
-    const SPREADSHEET_ID = "1PzWQDHZ9LKHi0gGFZ6ZT_9hvDG4PSCIEFt2Jm_L24E0";
+    //const SPREADSHEET_ID = "1PzWQDHZ9LKHi0gGFZ6ZT_9hvDG4PSCIEFt2Jm_L24E0";
     this.doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
+    this.sheetId = sheetId;
   }
-
+  
   static async getInstance(
     email?: string,
     private_key?: string,
+    spreadsheetId?: string,
+    sheetId?: number,
     callback?: (instance: GoogleSheet) => Promise<void>
   ): Promise<GoogleSheet> {
     if (!GoogleSheet.instance) {
       if (!email || !private_key) {
         throw new Error("No hay instancia previa y faltan las credenciales.");
       }
-      GoogleSheet.instance = new GoogleSheet(email, private_key);
+      GoogleSheet.instance = new GoogleSheet(email, private_key, spreadsheetId!, sheetId!);
       await GoogleSheet.instance.doc.loadInfo();
     }
 
@@ -41,9 +45,10 @@ export class GoogleSheet {
     return GoogleSheet.instance;
   }
 
-  async addRow(num: string, camp: string) {
+  async addRow(num: string, camp: string, name: string | null) {
     try {
-      const sheet = this.doc.sheetsById[1322261515];
+      console.log("datos que e envian a sheet: ",{num, camp, name});
+      const sheet = this.doc.sheetsById[this.sheetId];
 
     // Suponiendo que "NUMERO" está en la columna A y la hoja tiene N filas
     const cellRange = `C1:C${sheet.rowCount}`; // omitiendo encabezado
@@ -61,7 +66,11 @@ export class GoogleSheet {
     if (rowIndex !== null) {
       // Si se encontró, actualiza esa fila
       // Cargar la fila completa (o actualizar directamente las celdas correspondientes)
-      await sheet.loadCells(`C${rowIndex + 1}:F${rowIndex + 1}`);
+      await sheet.loadCells(`A${rowIndex + 1}:F${rowIndex + 1}`);
+      sheet.getCell(rowIndex, 0).value = new Date().toLocaleString("es-PE", { timeZone: "America/Lima" });
+      if(name != null){
+        sheet.getCell(rowIndex, 1).value = name;
+      }
       sheet.getCell(rowIndex, 2).value = num;
       sheet.getCell(rowIndex, 4).value = camp; // Asumiendo que CAMPAÑA_PROGRAMA está en la columna B
       sheet.getCell(rowIndex, 5).value = "WHATSAPP"; // Asumiendo que RED está en la columna C
@@ -69,8 +78,10 @@ export class GoogleSheet {
     } else {
       // Si no se encontró, agrega la fila
       await sheet.addRow({
+        FECHA: new Date().toLocaleString("es-PE", { timeZone: "America/Lima" }),
+        NOMBRE: name ? name : "SIN NOMBRE",
         NUMERO: num,
-        PROGRAMA: camp,
+        CAMPAÑA: camp,
         RED: "WHATSAPP"
       });
     }

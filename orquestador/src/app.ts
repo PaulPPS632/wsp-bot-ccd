@@ -8,6 +8,7 @@ import AsignacionesRouter from "./routes/Asignaciones.routes";
 import ReportsRouter from "./routes/Reports.routes";
 import UsuariosRouter from "./routes/Usuarios.routes";
 import ArchivoRouter from "./routes/Archivos.routes";
+import SheetsRouter from "./routes/Sheets.routes";
 //import { Authorization } from "./middlewares/Authorization";
 class App {
     private server: Application;
@@ -35,6 +36,7 @@ class App {
       this.server.use("/api/asignaciones",  AsignacionesRouter);
       this.server.use("/api/reports",  ReportsRouter);
       this.server.use("/api/archivos", ArchivoRouter);
+      this.server.use("/api/sheets", SheetsRouter);
     }
     public getServer(): Application {
       return this.server;

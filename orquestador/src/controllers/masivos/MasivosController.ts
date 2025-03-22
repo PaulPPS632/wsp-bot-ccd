@@ -21,9 +21,13 @@ class MasivosController {
         where: { number: numeros },
       });
 
+      console.log(masivos);
+      
+
       // Enviar mensaje a la cola para cada número
       const rabbitMQ = await RabbitMQService.getInstance();
-        
+      console.log("funciona hasta aca");
+      
       //registrando masivo
       const nuevoMasivo = await Masivos.create({
         name: masivos.name,
@@ -31,8 +35,15 @@ class MasivosController {
         delaymin: masivos.delaymin,
         delaymax: masivos.delaymax,
         usuarioId: req.data.id,
-        amountinteres: 0
+        amountinteres: 0,
+        flagResponder: masivos.flagResponder,
+        flowResponderId: masivos.flowResponder.id,
+        botId: masivos.flagResponder ? masivos.bot.id : null,
+        sheetId: masivos.sheet.id
       })
+      // flag para saber si hay 1 curso o mas, si hay 1 curso signigica q el respondedor no hara q el cliente escoga
+      // si hay mas de 1 curso el responderdor hara q el cliente escoga
+      const flagresponderseleccion = masivos.flowResponder.cursos.length === 1;
 
       // Registrar relación con flows
       if (masivos.flows && masivos.flows.length > 0) {
@@ -51,12 +62,14 @@ class MasivosController {
             id: flowAleatorio.id,
             name: flowAleatorio.name,
             mensajes: flowAleatorio.mensajes
-          } };
+          },
+          flagOneCurso: flagresponderseleccion
+        };
         
         // Enviar mensaje a la cola "bases"
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
         await Leads.update({
-          flowId:flowAleatorio.id,
+          //flowId:flowAleatorio.id,
           status: true,
           metodo: "MASIVO"
         },{where:{
@@ -106,18 +119,27 @@ class MasivosController {
       const rabbitMQ = await RabbitMQService.getInstance();
       
       //registrando masivo
+      console.log(masivos);
+      
+
       const nuevoMasivo = await Masivos.create({
         name: masivos.name,
         amountsend: masivos.cant,
         delaymin: masivos.delaymin,
         delaymax: masivos.delaymax,
         usuarioId: req.data.id,
-        amountinteres: 0
+        amountinteres: 0,
+        flagResponder: masivos.flagResponder,
+        flowResponderId: masivos.flowResponder.id,
+        botId: masivos.flagResponder ? masivos.bot.Id : null,
+        sheetId: masivos.sheet.id
       })
       // Registrar relación con flows
       if (masivos.flows && masivos.flows.length > 0) {
         await nuevoMasivo.$set("flows", masivos.flows.map((flow: any) => flow.id));
       }
+
+      const flagresponderseleccion = masivos.flowResponder.cursos.length === 1;
 
       for (const lead of leads) {
         const queue = "bases";
@@ -131,12 +153,14 @@ class MasivosController {
           id: flowAleatorio.id,
           name: flowAleatorio.name,
           mensajes: flowAleatorio.mensajes
-        } };
+        } ,
+        flagOneCurso: flagresponderseleccion
+        };
         
         // Enviar mensaje a la cola "bases"
         await rabbitMQ.sendMessage(queue, JSON.stringify(message));
         await Leads.update({
-          flowId:flowAleatorio.id,
+          //flowId:flowAleatorio.id,
           status: true,
           metodo: "MASIVO"
         },{where:{

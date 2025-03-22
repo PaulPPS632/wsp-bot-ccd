@@ -74,8 +74,7 @@ export const startRabbitConsumer = async (adapterProvider: BaileysProvider, ruta
                   "👉 2. *NO* ❌ No deseo",
                   "",
                   "¡Transforma tu futuro hoy! ¡Certifícate ya! 🎓",
-                  "",
-                  "Si deseas más información, comunícate al siguiente número: 908 911 275 o a mediante el link 👉 wa.link/v7wuhv"
+
                 ].join("\n"),
                 {}
               );

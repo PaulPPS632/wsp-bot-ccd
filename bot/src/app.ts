@@ -13,10 +13,11 @@ import { LimpiezaSession } from "./LimpiezaBotSession/LimpiezaBotSession";
 const PORT = 3000;
 const phoneNumber = process.env.PHONE ?? "51948701436";
 const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? '172.18.0.1';
+//const ruta_local_orquestador = process.env.RUTA_LOCAL_ORQUESTADOR ?? 'host.docker.internal';
 const interesado = addKeyword([EVENTS.ACTION, "1", "asesor","Asesor", "lista","Lista", 
   "Cursos", "precio","Precio","si","Si","SI","promoción","promo","información", "info","Info"],{ sensitive: true })
   .addAnswer(
-    "📝☎Perfecto estimad@, un asesor se comunicará con usted en la brevedad posible o comunícate al número directo de Asesor 908 911 275 (WhatsApp verificado) 👩🏻‍💻.",
+    "📝☎Perfecto estimad@, un asesor se comunicará con usted en la brevedad posible, gracias.",
     { capture: false }
   )
   .addAction(async (ctx) => {
@@ -36,7 +37,6 @@ const interesado = addKeyword([EVENTS.ACTION, "1", "asesor","Asesor", "lista","L
 const nointeresado = addKeyword([EVENTS.ACTION, "2", "no","NO","No"], {sensitive:true}).addAnswer(
   [
     "📝Muy bien estimado, si estuviera interesado no dude en escribirnos y con gusto lo atenderemos 🙋🏻‍♀",
-    "📌Le adjunto el número de asesor 908 911 275",
   ].join("\n"),
   { capture: false }
 ).addAction(async (ctx) => {
@@ -62,8 +62,7 @@ const welcome = addKeyword<Provider, Database>(EVENTS.WELCOME).addAnswer(
     "👉 2. NO ❌ No deseo",
     "",
     "¡Transforma tu futuro hoy! ¡Certifícate ya! 🎓",
-    "",
-    "Si deseas más información, comunícate al siguiente número: 908 911 275 o a mediante el link 👉 wa.link/v7wuhv"
+    
   ].join("\n"),
   { capture: true },
   async (ctx, { fallBack, gotoFlow }) => {

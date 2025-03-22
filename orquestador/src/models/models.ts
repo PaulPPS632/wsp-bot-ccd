@@ -7,6 +7,7 @@ import { MasivoLead } from "./MasivoLead";
 import { Masivos } from "./Masivos";
 import { MasivosFlows } from "./MasivosDlows";
 import { Roles } from "./Roles";
+import { Sheets } from "./Sheets";
 import { Usuarios } from "./Usuarios";
 
 export const models = [
@@ -19,5 +20,6 @@ export const models = [
     MasivosFlows,
     MasivoLead,
     Usuarios,
-    Roles
+    Roles,
+    Sheets
   ];

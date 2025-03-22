@@ -27,7 +27,10 @@ export const consultar = async (phone: string):Promise<{ flag: boolean, cursos: 
     }else {
         const data = await respuesta.json();
         const registradocurso = data.lead.curso;
-        return {flag: registradocurso !== null , cursos: data.lead.flow.cursos};
+        
+        console.log("cursos registrados:",data.masivo.flowResponder.cursos);
+        
+        return {flag: registradocurso !== null , cursos: data.masivo.flowResponder.cursos};
     }
 }
 

@@ -154,7 +154,7 @@ import { Sequelize } from "sequelize-typescript";
         
         ReporteMasivos = async (_req: any, res: any) => {
             const masivos = await Masivos.findAll({
-                include: [{ model: Flows }],
+                include: [{ model: Flows, as: "flows" }],
                 limit: 1000,
                 order: [["createdAt", "DESC"]]
             });
@@ -181,7 +181,7 @@ import { Sequelize } from "sequelize-typescript";
             const masivosLead = await MasivoLead.findAll({
                 include: [
                     { model: Masivos },
-                    { model: Leads, include: [{ model: Flows }] }
+                    { model: Leads}
                 ],
                 where: {
                     masivoId: id,
@@ -192,6 +192,7 @@ import { Sequelize } from "sequelize-typescript";
                 },
                 limit: 100
             });
+            
     
             const formattedMasivos = masivosLead.map(masivolead => ({
                 masivo: masivolead.masivo?.name || "DESCONOCIDO",

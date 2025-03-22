@@ -1,5 +1,4 @@
-import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Model, Table, Unique } from "sequelize-typescript";
-import { Flows } from "./Flows";
+import { AllowNull,  Column, DataType,  Model, Table, Unique } from "sequelize-typescript";
 
 @Table({
     tableName: "leads"
@@ -18,14 +17,6 @@ export class Leads extends Model{
     @AllowNull(true)
     @Column(DataType.STRING)
     email!: string;
-    
-    @BelongsTo(() => Flows)
-    flow!: Flows;
-
-    @ForeignKey(() => Flows)
-    @AllowNull(true)
-    @Column(DataType.INTEGER)
-    flowId!: number
 
     @AllowNull(true)
     @Column(DataType.STRING)

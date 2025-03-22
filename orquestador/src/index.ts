@@ -3,7 +3,7 @@ config();
 import database from "./config/database";
 import app from "./app";
 import RabbitMQService from "./services/RabbitMQService";
-import { GoogleSheet } from "./services/GoogleSheet";
+//import { GoogleSheet } from "./services/GoogleSheet";
 import { createServer } from "http";
 import { WebSocketBots } from "./services/WebSocketBots";
 import { Worker } from "bullmq";
@@ -26,14 +26,14 @@ async function main(): Promise<void> {
     await RabbitMQService.getInstance();
 
     //coneccion con googlesheet
+    /*
     await GoogleSheet.getInstance(
       process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
       process.env.GOOGLE_PRIVATE_KEY!,
-      async (sheetInstance) => {
-        console.log("Hoja cargada:", sheetInstance.getDoc().title);
-      }
+      "1CD5xv_1znoePcapHM2iH7cyXjwuDlllKlb4f3OJcijQ",
+      2076719352
     );
-
+*/
     new Worker(
       "taskQueue",
       async (job: any) => {
