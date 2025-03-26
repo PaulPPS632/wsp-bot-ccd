@@ -66,14 +66,15 @@ export class GoogleSheet {
     if (rowIndex !== null) {
       // Si se encontró, actualiza esa fila
       // Cargar la fila completa (o actualizar directamente las celdas correspondientes)
-      await sheet.loadCells(`A${rowIndex + 1}:F${rowIndex + 1}`);
+      await sheet.loadCells(`A${rowIndex + 1}:G${rowIndex + 1}`);
       sheet.getCell(rowIndex, 0).value = new Date().toLocaleString("es-PE", { timeZone: "America/Lima" });
       if(name != null){
         sheet.getCell(rowIndex, 1).value = name;
       }
       sheet.getCell(rowIndex, 2).value = num;
       sheet.getCell(rowIndex, 4).value = camp; // Asumiendo que CAMPAÑA_PROGRAMA está en la columna B
-      sheet.getCell(rowIndex, 5).value = "WHATSAPP"; // Asumiendo que RED está en la columna C
+      sheet.getCell(rowIndex, 5).value = "Whatsapp"; //  Asumiendo que RED está en la columna C
+      sheet.getCell(rowIndex, 6).value = "Mensaje Enviado"; // Asumiendo que RED está en la columna C
       await sheet.saveUpdatedCells();
     } else {
       // Si no se encontró, agrega la fila
@@ -82,7 +83,8 @@ export class GoogleSheet {
         NOMBRE: name ? name : "SIN NOMBRE",
         NUMERO: num,
         CAMPAÑA: camp,
-        RED: "WHATSAPP"
+        RED: "Whatsapp",
+        MENSAJE: "Mensaje Enviado",
       });
     }
     } catch (error: any) {
