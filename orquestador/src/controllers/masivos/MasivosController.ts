@@ -37,9 +37,9 @@ class MasivosController {
         usuarioId: req.data.id,
         amountinteres: 0,
         flagResponder: masivos.flagResponder,
-        flowResponderId: masivos.flowResponder.id,
+        flowResponderId: masivos.flowResponder.id == 0 ? null : masivos.flowResponder.id,
         botId: masivos.flagResponder ? masivos.bot.id : null,
-        sheetId: masivos.sheet.id
+        sheetId: masivos.sheet.id == 0 ? null : masivos.sheet.id
       })
       // flag para saber si hay 1 curso o mas, si hay 1 curso signigica q el respondedor no hara q el cliente escoga
       // si hay mas de 1 curso el responderdor hara q el cliente escoga
