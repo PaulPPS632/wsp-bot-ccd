@@ -56,7 +56,7 @@ class LeadsController {
         })
         if (masivolead) {
           await masivolead.update({ status: respuesta });
-          if(masivolead.status != null){
+          if(masivolead.status != null && respuesta === 'interesado'){
             console.log("=============================================")
             console.log("AQUI LLEGA -------------------------");
             console.log("=============================================")

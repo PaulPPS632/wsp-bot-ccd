@@ -30,13 +30,12 @@ export class GoogleSheet {
     sheetId?: number,
     callback?: (instance: GoogleSheet) => Promise<void>
   ): Promise<GoogleSheet> {
-    if (!GoogleSheet.instance) {
-      if (!email || !private_key) {
-        throw new Error("No hay instancia previa y faltan las credenciales.");
-      }
-      GoogleSheet.instance = new GoogleSheet(email, private_key, spreadsheetId!, sheetId!);
-      await GoogleSheet.instance.doc.loadInfo();
+
+    if (!email || !private_key) {
+      throw new Error("No hay instancia previa y faltan las credenciales.");
     }
+    GoogleSheet.instance = new GoogleSheet(email, private_key, spreadsheetId!, sheetId!);
+    await GoogleSheet.instance.doc.loadInfo();
 
     if (callback) {
       await callback(GoogleSheet.instance);
