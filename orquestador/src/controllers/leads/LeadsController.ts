@@ -95,7 +95,10 @@ class LeadsController {
           console.log("cursos", masivolead!.masivo.flowResponderId);
           const flagresponderseleccion = masivolead!.masivo.flowResponder!.cursos.length === 1;
           const cursoselected = masivolead?.masivo.flagResponder ? flagresponderseleccion ? masivolead!.masivo.flowResponder!.cursos[0]: "Sin curso seleccionado"  : "Sin curso seleccionado";
-          await sheetInstance.addRow(phone, cursoselected, name);
+          if(respuesta === "interesado"){
+            await sheetInstance.addRow(phone, cursoselected, name);
+          }
+          
           const flowResponder = await Flows.findOne({
             where: {
               id: masivolead.masivo.flowResponderId
