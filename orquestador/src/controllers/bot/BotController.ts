@@ -21,17 +21,23 @@ class BotController {
 
       const docker = DockerService.getInstance().getDocker();
 
+      const { DB_HOST_MYSQL_DOCKER, HOST_RABBITMQ, USER_RABBITMQ, PASSWORD_RABBITMQ,DB_PASSWORD_MYSQL_DOCKER,DB_USER_MYSQL_DOCKER } = process.env;
+
+
       // Crear y correr un contenedor
       const container = await docker.createContainer({
         Image: imagebot, // Imagen del bot
         name: `bot-${imagebot}-${phone}`, // Nombre único del contenedor
         Env: [
           `PHONE=51${phone}`,
-          `DB_HOST=mysql-bots`,
-          `DB_USER=root`,
+          `DB_HOST=${DB_HOST_MYSQL_DOCKER}`,
+          `DB_USER=${DB_USER_MYSQL_DOCKER}`,
           `DB_NAME=${db_name}`, // Nueva DB específica del bot
-          `DB_PASSWORD=botsito`,
-          `DB_PORT=3306`
+          `DB_PASSWORD=${DB_PASSWORD_MYSQL_DOCKER}`,
+          `DB_PORT=3307`,
+          `HOST_RABBITMQ=${HOST_RABBITMQ}`,
+          `USER_RABBITMQ=${USER_RABBITMQ}`,
+          `PASSWORD_RABBITMQ=${PASSWORD_RABBITMQ}`
           ],
         ExposedPorts: {
           "3000/tcp": {}, // Puerto expuesto dentro del contenedor
